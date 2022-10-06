@@ -1,6 +1,6 @@
-use crate::http::status::Status;
 use crate::response::builder::ResponseBuilder;
 use std::collections::hash_map::HashMap;
+use webserver_http::Status;
 
 mod builder;
 

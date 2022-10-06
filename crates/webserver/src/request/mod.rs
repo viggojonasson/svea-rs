@@ -1,5 +1,5 @@
-use crate::http::method::Method;
 use std::collections::HashMap;
+use webserver_http::Method;
 
 pub struct Request {
     pub body: String,

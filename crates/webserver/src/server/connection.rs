@@ -1,9 +1,10 @@
-use crate::{http::status::Status, request::Request, response::Response, server::Server};
+use crate::{request::Request, response::Response, server::Server};
 use std::sync::Arc;
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::TcpStream,
 };
+use webserver_http::Status;
 
 pub async fn handle_connection(stream: &mut TcpStream, server: Arc<Server>) {
     let mut buffer = [0; 1024];
