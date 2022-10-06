@@ -10,8 +10,13 @@ async fn main() {
         })
         .route("/hello", |request| {
             Response::builder()
-                .status(Status::NotFound)
-                .body(format!("hello {}", request.path))
+                .status(Status::Ok)
+                .body(format!(
+                    "hello you are doing a {} request to {}, peer address is: {}",
+                    request.method.to_string(),
+                    request.path,
+                    request.ip_address.unwrap()
+                ))
                 .build()
         })
         .fallback(|_request| {

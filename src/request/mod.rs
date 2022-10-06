@@ -7,6 +7,7 @@ pub struct Request {
     pub path: String,
     pub headers: HashMap<String, String>,
     pub cookies: HashMap<String, String>,
+    pub ip_address: Option<String>,
 }
 
 impl TryInto<Request> for String {
@@ -64,6 +65,8 @@ impl TryInto<Request> for String {
             path,
             headers,
             cookies,
+            /// Don't know what this is, is only known on the tcp stream.
+            ip_address: None,
         })
     }
 }

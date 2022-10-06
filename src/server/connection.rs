@@ -9,7 +9,7 @@ pub async fn handle_connection(stream: &mut TcpStream, server: Arc<Server>) {
     let mut buffer = [0; 1024];
     stream.read(&mut buffer).await.unwrap();
 
-    let request: Request = match String::from_utf8_lossy(&buffer).to_string().try_into() {
+    let mut request: Request = match String::from_utf8_lossy(&buffer).to_string().try_into() {
         Ok(request) => request,
         Err(_) => {
             let response = Response::builder().status(Status::BadRequest).build();
@@ -20,6 +20,11 @@ pub async fn handle_connection(stream: &mut TcpStream, server: Arc<Server>) {
             return;
         }
     };
+
+    match stream.peer_addr() {
+        Ok(addr) => request.ip_address = Some(addr.ip().to_string()),
+        Err(_) => {}
+    }
 
     let response = map_request(request, server).await;
 
