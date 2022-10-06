@@ -10,6 +10,13 @@ async fn main() {
         "hello i hate siffran nio".to_string().into()
     });
 
+    server.fallback(|_request| {
+        Response::builder()
+            .status(Status::NotFound)
+            .body("<h1>Page you tried to access does not exist!</h1>")
+            .build()
+    });
+
     server.route("/hello", |request| {
         Response::builder()
             .status(Status::NotFound)

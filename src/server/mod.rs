@@ -4,10 +4,13 @@ use tokio::net::TcpListener;
 
 pub mod connection;
 
+pub type Handler = Box<dyn Fn(Request) -> Response + Send + Sync>;
+
 pub struct Server {
     pub address: String,
     pub port: u16,
-    pub routes: HashMap<String, Box<dyn Fn(Request) -> Response + Send + Sync>>,
+    pub routes: HashMap<String, Handler>,
+    pub fallback: Option<Handler>,
 }
 
 impl Server {
@@ -16,7 +19,12 @@ impl Server {
             address,
             port,
             routes: HashMap::new(),
+            fallback: None,
         }
+    }
+
+    pub fn fallback(&mut self, handler: impl Fn(Request) -> Response + Send + Sync + 'static) {
+        self.fallback = Some(Box::new(handler));
     }
 
     pub fn route(
