@@ -31,7 +31,7 @@ impl TryFrom<String> for Method {
     type Error = String;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
-        match value.to_lowercase().as_str() {
+        match value.to_uppercase().as_str() {
             "GET" => Ok(Method::GET),
             "POST" => Ok(Method::POST),
             "PUT" => Ok(Method::PUT),
