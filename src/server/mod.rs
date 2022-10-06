@@ -23,16 +23,21 @@ impl Server {
         }
     }
 
-    pub fn fallback(&mut self, handler: impl Fn(Request) -> Response + Send + Sync + 'static) {
+    pub fn fallback(
+        mut self,
+        handler: impl Fn(Request) -> Response + Send + Sync + 'static,
+    ) -> Self {
         self.fallback = Some(Box::new(handler));
+        self
     }
 
     pub fn route(
-        &mut self,
+        mut self,
         path: &str,
         handler: impl Fn(Request) -> Response + Send + Sync + 'static,
-    ) {
+    ) -> Self {
         self.routes.insert(path.to_string(), Box::new(handler));
+        self
     }
 
     pub async fn run(self) {
