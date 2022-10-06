@@ -1,7 +1,8 @@
 use crate::http::status::Status;
+use crate::response::builder::ResponseBuilder;
 use std::collections::hash_map::HashMap;
 
-pub mod builder;
+mod builder;
 
 #[derive(Debug)]
 pub struct Response {
@@ -27,12 +28,16 @@ impl Default for Response {
 }
 
 impl Response {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             body: String::new(),
             status: Status::Ok,
             headers: HashMap::new(),
         }
+    }
+
+    pub fn builder() -> ResponseBuilder {
+        ResponseBuilder::new()
     }
 }
 

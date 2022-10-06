@@ -1,9 +1,4 @@
-use crate::{
-    http::status::Status,
-    request::Request,
-    response::{builder::ResponseBuilder, Response},
-    server::Server,
-};
+use crate::{http::status::Status, request::Request, response::Response, server::Server};
 use std::sync::Arc;
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
@@ -30,7 +25,7 @@ pub async fn handle_connection(stream: &mut TcpStream, server: Arc<Server>) {
 pub async fn map_request(request: Request, server: Arc<Server>) -> Response {
     match server.routes.get(&request.path) {
         Some(handler) => handler(request),
-        None => ResponseBuilder::new()
+        None => Response::builder()
             .status(Status::NotFound)
             .body("Not Found")
             .build(),

@@ -1,6 +1,4 @@
-use webserver::{
-    http::status::Status, request::Request, response::builder::ResponseBuilder, server::Server,
-};
+use webserver::{http::status::Status, response::Response, server::Server};
 
 #[tokio::main]
 async fn main() {
@@ -13,9 +11,9 @@ async fn main() {
     });
 
     server.route("/hello", |request| {
-        ResponseBuilder::new()
+        Response::builder()
             .status(Status::NotFound)
-            .body("<h1>Här finns inget </h1>")
+            .body(format!("hello {}", request.path))
             .build()
     });
 
