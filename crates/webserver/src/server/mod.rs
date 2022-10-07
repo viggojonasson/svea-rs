@@ -1,4 +1,4 @@
-use crate::{request::Request, response::Response};
+use crate::{interceptor::Interceptor, request::Request, response::Response};
 use std::{collections::HashMap, sync::Arc};
 use tokio::net::TcpListener;
 
@@ -11,6 +11,7 @@ pub struct Server {
     pub port: u16,
     pub routes: HashMap<String, Handler>,
     pub fallback: Option<Handler>,
+    pub interceptors: Vec<Interceptor>,
 }
 
 impl Server {
@@ -20,6 +21,7 @@ impl Server {
             port,
             routes: HashMap::new(),
             fallback: None,
+            interceptors: Vec::new(),
         }
     }
 
@@ -28,6 +30,11 @@ impl Server {
         handler: impl Fn(Request) -> Response + Send + Sync + 'static,
     ) -> Self {
         self.fallback = Some(Box::new(handler));
+        self
+    }
+
+    pub fn interceptor(mut self, interceptor: Interceptor) -> Self {
+        self.interceptors.push(interceptor);
         self
     }
 

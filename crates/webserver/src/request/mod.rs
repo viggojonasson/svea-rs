@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use webserver_http::Method;
 
+#[derive(Clone)]
 pub struct Request {
     pub body: String,
     pub method: Method,

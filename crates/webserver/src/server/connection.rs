@@ -27,7 +27,11 @@ pub async fn handle_connection(stream: &mut TcpStream, server: Arc<Server>) {
         Err(_) => {}
     }
 
-    let response = map_request(request, server).await;
+    let response = map_request(request.clone(), server.clone()).await;
+
+    let interceptor = server.interceptors.first().unwrap();
+
+    let response = (interceptor.on_request)(request, response).await;
 
     stream
         .write(String::from(response).as_bytes())

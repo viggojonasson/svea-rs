@@ -11,3 +11,4 @@ members = ["webserver-http"]
 [dependencies]
 tokio = {version = "1.21.2", features = ["full"] }
 webserver-http = { path = "../webserver-http" }
+futures = "0.3.24"
