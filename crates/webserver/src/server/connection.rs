@@ -42,7 +42,7 @@ pub async fn handle_connection(stream: &mut TcpStream, server: Arc<Server>) {
 }
 
 pub async fn map_request(request: Request, server: Arc<Server>) -> Response {
-    match server.routes.get(&request.path) {
+    match server.routes.find_matching(&request.path) {
         Some(handler) => handler(request),
         None => {
             if let Some(fallback) = &server.fallback {

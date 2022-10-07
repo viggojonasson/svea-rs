@@ -1,15 +1,17 @@
-use crate::{interceptor::Interceptor, request::Request, response::Response};
+use crate::server::routing::Routes;
+use crate::{interceptor::Interceptor, path::Path, request::Request, response::Response};
 use std::{collections::HashMap, sync::Arc};
 use tokio::net::TcpListener;
 
 pub mod connection;
+pub mod routing;
 
 pub type Handler = Box<dyn Fn(Request) -> Response + Send + Sync>;
 
 pub struct Server {
     pub address: String,
     pub port: u16,
-    pub routes: HashMap<String, Handler>,
+    pub routes: Routes,
     pub fallback: Option<Handler>,
     pub interceptors: Vec<Interceptor>,
 }
@@ -19,7 +21,7 @@ impl Server {
         Self {
             address,
             port,
-            routes: HashMap::new(),
+            routes: Routes::new(),
             fallback: None,
             interceptors: Vec::new(),
         }
@@ -40,10 +42,11 @@ impl Server {
 
     pub fn route(
         mut self,
-        path: &str,
+        path: Path,
         handler: impl Fn(Request) -> Response + Send + Sync + 'static,
     ) -> Self {
-        self.routes.insert(path.to_string(), Box::new(handler));
+        self.routes.add(path, Box::new(handler));
+        //self.routes.insert(path, Box::new(handler));
         self
     }
 
