@@ -1,5 +1,5 @@
 #[derive(Clone, Debug, PartialEq)]
-pub enum Query {
+pub enum QueryValue {
     U8(u8),
     U16(u16),
     U32(u32),
@@ -14,32 +14,32 @@ pub enum Query {
     Bool(bool),
 }
 
-impl From<String> for Query {
+impl From<String> for QueryValue {
     fn from(value: String) -> Self {
         if let Ok(value) = value.parse::<u8>() {
-            Query::U8(value)
+            QueryValue::U8(value)
         } else if let Ok(value) = value.parse::<u16>() {
-            Query::U16(value)
+            QueryValue::U16(value)
         } else if let Ok(value) = value.parse::<u32>() {
-            Query::U32(value)
+            QueryValue::U32(value)
         } else if let Ok(value) = value.parse::<u64>() {
-            Query::U64(value)
+            QueryValue::U64(value)
         } else if let Ok(value) = value.parse::<i8>() {
-            Query::I8(value)
+            QueryValue::I8(value)
         } else if let Ok(value) = value.parse::<i16>() {
-            Query::I16(value)
+            QueryValue::I16(value)
         } else if let Ok(value) = value.parse::<i32>() {
-            Query::I32(value)
+            QueryValue::I32(value)
         } else if let Ok(value) = value.parse::<i64>() {
-            Query::I64(value)
+            QueryValue::I64(value)
         } else if let Ok(value) = value.parse::<f32>() {
-            Query::F32(value)
+            QueryValue::F32(value)
         } else if let Ok(value) = value.parse::<f64>() {
-            Query::F64(value)
+            QueryValue::F64(value)
         } else if let Ok(value) = value.parse::<bool>() {
-            Query::Bool(value)
+            QueryValue::Bool(value)
         } else {
-            Query::String(value)
+            QueryValue::String(value)
         }
     }
 }

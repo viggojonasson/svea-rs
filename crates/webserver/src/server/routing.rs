@@ -12,10 +12,17 @@ impl Routes {
         self.0.push((path, handler));
     }
 
-    pub fn find_matching(&self, path: Path) -> Option<(Path, Handler)> {
-        for (p, h) in self.0 {
+    pub fn find_matching_handler(&self, path: &Path) -> Option<&Handler> {
+        for (p, h) in &self.0 {
+            if p.queries.0.len() == 0 {
+                println!("Comparing: {} = {}", p.path, path.path);
+                if p.path == path.path {
+                    return Some(&h);
+                }
+            }
+
             if p == path {
-                return Some((p, h));
+                return Some(&h);
             }
         }
         None

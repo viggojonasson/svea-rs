@@ -1,14 +1,14 @@
-use webserver_http::Query;
+use webserver_http::QueryValue;
 
-#[derive(PartialEq)]
-pub struct Queries(Vec<(String, Query)>);
+#[derive(PartialEq, Clone)]
+pub struct Queries(pub Vec<(String, QueryValue)>);
 
 impl Queries {
     pub fn new() -> Self {
         Queries(Vec::new())
     }
 
-    pub fn insert(&mut self, key: String, value: Query) {
+    pub fn insert(&mut self, key: String, value: QueryValue) {
         self.0.push((key, value));
     }
 

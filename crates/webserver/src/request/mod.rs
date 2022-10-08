@@ -1,3 +1,4 @@
+use crate::path::Path;
 use std::collections::HashMap;
 use webserver_http::Method;
 
@@ -5,7 +6,7 @@ use webserver_http::Method;
 pub struct Request {
     pub body: String,
     pub method: Method,
-    pub path: String,
+    pub path: Path,
     pub headers: HashMap<String, String>,
     pub cookies: HashMap<String, String>,
     pub ip_address: Option<String>,
@@ -59,6 +60,8 @@ impl TryInto<Request> for String {
         let body: String = lines.skip_while(|line| !line.is_empty()).skip(1).collect();
         // ?
         let body = body.trim().to_string();
+
+        let path = Path::from(path);
 
         Ok(Request {
             body,

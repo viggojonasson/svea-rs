@@ -1,5 +1,10 @@
 use webserver::{
-    http::Status, interceptor::Interceptor, request::Request, response::Response, server::Server,
+    http::Status,
+    interceptor::Interceptor,
+    path::{queries::Queries, Path},
+    request::Request,
+    response::Response,
+    server::Server,
 };
 
 async fn intercept(request: Request, response: Response) -> Response {
@@ -23,22 +28,19 @@ async fn main() {
         on_request: Box::new(move |req, res| Box::pin(intercept(req, res))),
     };
 
+    let path = Path::new("/test".to_string(), Queries::new());
+
     Server::new("localhost".to_string(), 3000)
-        .route("/", |_request| {
-            "hello i hate siffran nio".to_string().into()
+        .route(path, |req| {
+            let mut queries = String::new();
+
+            for (key, value) in req.path.queries.0 {
+                queries.push_str(&format!("{}: {:#?}, ", key, value));
+            }
+
+            format!("<h1>Queries you sent</h1><br>{}", queries).into()
         })
         .interceptor(interceptor)
-        .route("/hello", |request| {
-            Response::builder()
-                .status(Status::Ok)
-                .body(format!(
-                    "hello you are doing a {} request to {}, peer address is: {}",
-                    request.method.to_string(),
-                    request.path,
-                    request.ip_address.unwrap()
-                ))
-                .build()
-        })
         .fallback(|_request| {
             Response::builder()
                 .status(Status::NotFound)
