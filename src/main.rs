@@ -41,13 +41,11 @@ async fn main() {
     let change_status_interceptor = Interceptor::builder()
         .activate_on(activate_on)
         .on_request(change_status)
-        .name("change_status".to_string())
-        .build();
+        .name("change_status".to_string());
 
     let add_status_to_body_interceptor = Interceptor::builder()
         .activate_on(activate_on)
-        .on_request(change_body)
-        .build();
+        .on_request(change_body);
 
     let path = Path::new("/test".to_string(), Queries::new());
 

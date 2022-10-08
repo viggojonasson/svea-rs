@@ -1,8 +1,14 @@
 use crate::{interceptor::Interceptor, request::Request, response::Response};
-use futures::{future::BoxFuture, Future};
+use futures::Future;
 
 pub struct InterceptorBuilder {
     interceptor: Interceptor,
+}
+
+impl Into<Interceptor> for InterceptorBuilder {
+    fn into(self) -> Interceptor {
+        self.build()
+    }
 }
 
 impl InterceptorBuilder {

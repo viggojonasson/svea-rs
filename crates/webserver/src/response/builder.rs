@@ -5,6 +5,12 @@ pub struct ResponseBuilder {
     response: Response,
 }
 
+impl Into<Response> for ResponseBuilder {
+    fn into(self) -> Response {
+        self.build()
+    }
+}
+
 impl ResponseBuilder {
     pub fn new() -> Self {
         Self {

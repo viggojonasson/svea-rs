@@ -35,8 +35,8 @@ impl Server {
         self
     }
 
-    pub fn interceptor(mut self, interceptor: Interceptor) -> Self {
-        self.interceptors.push(interceptor);
+    pub fn interceptor(mut self, interceptor: impl Into<Interceptor>) -> Self {
+        self.interceptors.push(interceptor.into());
         self
     }
 
