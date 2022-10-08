@@ -14,34 +14,32 @@ pub enum Query {
     Bool(bool),
 }
 
-impl TryFrom<String> for Query {
-    type Error = String;
-
-    fn try_from(value: String) -> Result<Self, Self::Error> {
+impl From<String> for Query {
+    fn from(value: String) -> Self {
         if let Ok(value) = value.parse::<u8>() {
-            Ok(Query::U8(value))
+            Query::U8(value)
         } else if let Ok(value) = value.parse::<u16>() {
-            Ok(Query::U16(value))
+            Query::U16(value)
         } else if let Ok(value) = value.parse::<u32>() {
-            Ok(Query::U32(value))
+            Query::U32(value)
         } else if let Ok(value) = value.parse::<u64>() {
-            Ok(Query::U64(value))
+            Query::U64(value)
         } else if let Ok(value) = value.parse::<i8>() {
-            Ok(Query::I8(value))
+            Query::I8(value)
         } else if let Ok(value) = value.parse::<i16>() {
-            Ok(Query::I16(value))
+            Query::I16(value)
         } else if let Ok(value) = value.parse::<i32>() {
-            Ok(Query::I32(value))
+            Query::I32(value)
         } else if let Ok(value) = value.parse::<i64>() {
-            Ok(Query::I64(value))
+            Query::I64(value)
         } else if let Ok(value) = value.parse::<f32>() {
-            Ok(Query::F32(value))
+            Query::F32(value)
         } else if let Ok(value) = value.parse::<f64>() {
-            Ok(Query::F64(value))
+            Query::F64(value)
         } else if let Ok(value) = value.parse::<bool>() {
-            Ok(Query::Bool(value))
+            Query::Bool(value)
         } else {
-            Ok(Query::String(value))
+            Query::String(value)
         }
     }
 }
