@@ -12,6 +12,26 @@ impl Queries {
         self.0.push((key, value));
     }
 
+    pub fn get_by_key(&self, key: String) -> Option<&QueryValue> {
+        for (k, v) in &self.0 {
+            if k == &key {
+                return Some(v);
+            }
+        }
+
+        None
+    }
+
+    pub fn get_by_value(&self, value: QueryValue) -> Option<&String> {
+        for (k, v) in &self.0 {
+            if v == &value {
+                return Some(k);
+            }
+        }
+
+        None
+    }
+
     pub fn remove_by_key(&mut self, key: String) -> bool {
         todo!();
     }

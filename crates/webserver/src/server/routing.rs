@@ -15,7 +15,6 @@ impl Routes {
     pub fn find_matching_handler(&self, path: &Path) -> Option<&Handler> {
         for (p, h) in &self.0 {
             if p.queries.0.len() == 0 {
-                println!("Comparing: {} = {}", p.path, path.path);
                 if p.path == path.path {
                     return Some(&h);
                 }
