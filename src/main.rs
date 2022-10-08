@@ -39,13 +39,14 @@ async fn activate_on(request: Request) -> bool {
 #[tokio::main]
 async fn main() {
     let change_status_interceptor = Interceptor::builder()
-        .activate_on(activate_on)
         .on_request(change_status)
-        .name("change_status".to_string());
+        .activate_on(activate_on)
+        .name("change_status");
 
     let add_status_to_body_interceptor = Interceptor::builder()
-        .activate_on(activate_on)
-        .on_request(change_body);
+        .on_request(change_body)
+        .activate_on_all(true)
+        .name("add_status_to_body");
 
     let path = Path::new("/test".to_string(), Queries::new());
 
