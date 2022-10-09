@@ -1,6 +1,6 @@
 use crate::server::routing::Routes;
 use crate::{interceptor::Interceptor, path::Path, request::Request, response::Response};
-use std::{collections::HashMap, sync::Arc};
+use std::sync::Arc;
 use tokio::net::TcpListener;
 
 pub mod connection;
@@ -42,11 +42,10 @@ impl Server {
 
     pub fn route(
         mut self,
-        path: Path,
+        path: impl Into<Path>,
         handler: impl Fn(Request) -> Response + Send + Sync + 'static,
     ) -> Self {
-        self.routes.add(path, Box::new(handler));
-        //self.routes.insert(path, Box::new(handler));
+        self.routes.add(path.into(), Box::new(handler));
         self
     }
 

@@ -9,7 +9,7 @@ impl Queries {
     }
 
     pub fn insert(&mut self, key: String, value: QueryValue) {
-        self.0.push((key, value));
+        self.0.push((key, value.into()));
     }
 
     pub fn get_by_key(&self, key: String) -> Option<&QueryValue> {
