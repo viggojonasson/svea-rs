@@ -99,7 +99,6 @@ mod test {
         let parsed: Request = request.try_into().unwrap();
 
         assert_eq!(parsed.method, Method::GET);
-        assert_eq!(parsed.path, "/");
         assert_eq!(parsed.body, "Hello, World!");
         assert_eq!(parsed.headers.get("Host").unwrap(), "localhost:8080");
         assert_eq!(parsed.cookies.get("test").unwrap(), "123")
