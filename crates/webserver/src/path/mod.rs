@@ -1,5 +1,6 @@
-use crate::path::queries::Queries;
+use crate::path::{builder::PathBuilder, queries::Queries};
 
+pub mod builder;
 pub mod queries;
 
 #[derive(PartialEq, Clone)]
@@ -11,6 +12,10 @@ pub struct Path {
 impl Path {
     pub fn new(path: String, queries: Queries) -> Self {
         Self { path, queries }
+    }
+
+    pub fn builder() -> PathBuilder {
+        PathBuilder::new()
     }
 }
 
