@@ -27,8 +27,11 @@ impl Server {
         }
     }
 
-    pub fn router(mut self, router: Router) -> Self {
-        self.router = router;
+    pub fn router<R>(mut self, router: R) -> Self
+    where
+        R: Into<Router>,
+    {
+        self.router = router.into();
         self
     }
 

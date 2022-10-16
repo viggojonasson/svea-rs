@@ -32,12 +32,15 @@ async fn handle_get_index(server: Arc<Server>, req: Request) -> Response {
 
 #[tokio::main]
 async fn main() {
-    let route = Route::new(Path::builder().path("/"), handle_get_index);
-
-    let router = Router::default().route(route);
-
     Server::new("localhost".to_string(), 3000)
-        .router(router)
+        .router(
+            Router::builder().route(
+                Route::builder()
+                    .path(Path::builder().path("/").build())
+                    .handler(handle_get_index)
+                    .build(),
+            ),
+        )
         .interceptor(
             Interceptor::builder()
                 .name("append query")

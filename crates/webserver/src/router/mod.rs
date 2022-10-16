@@ -1,5 +1,6 @@
-use crate::{path::Path, router::route::Route};
+use crate::{path::Path, router::builder::RouterBuilder, router::route::Route};
 
+pub mod builder;
 pub mod route;
 
 pub struct Router {
@@ -13,9 +14,8 @@ impl Default for Router {
 }
 
 impl Router {
-    pub fn route(mut self, route: Route) -> Self {
-        self.routes.push(route);
-        self
+    pub fn builder() -> RouterBuilder {
+        RouterBuilder::new()
     }
 
     pub fn find_matching_route(&self, path: &Path) -> Option<&Route> {
