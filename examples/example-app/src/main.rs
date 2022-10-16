@@ -35,20 +35,15 @@ async fn main() {
         })
         .router(
             Router::builder()
+                .route(Route::builder().path("/").handler(|_, _| async move {
+                    Response::builder()
+                        .status(Status::Ok)
+                        .body("<h1>Hello, world!</h1>")
+                        .build()
+                }))
                 .route(
                     Route::builder()
-                        .path(Path::builder().path("/").build())
-                        .handler(|_, _| async move {
-                            Response::builder()
-                                .status(Status::Ok)
-                                .body("<h1>Hello, world!</h1>")
-                                .build()
-                        })
-                        .build(),
-                )
-                .route(
-                    Route::builder()
-                        .path(Path::builder().path("/users").build())
+                        .path("/users")
                         .handler(|server, _| async move {
                             let db = server.get_state::<UserDB>().unwrap();
 
@@ -59,8 +54,7 @@ async fn main() {
                             }
 
                             Response::builder().status(Status::Ok).body(body).build()
-                        })
-                        .build(),
+                        }),
                 ),
         )
         .interceptor(

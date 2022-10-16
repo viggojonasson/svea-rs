@@ -1,4 +1,4 @@
-use crate::path::Path;
+use crate::path::{parse_as_path, Path};
 use std::collections::HashMap;
 use webserver_http::Method;
 
@@ -61,7 +61,7 @@ impl TryInto<Request> for String {
         // ?
         let body = body.trim().to_string();
 
-        let path = Path::from(path);
+        let path = parse_as_path(path);
 
         Ok(Request {
             body,
