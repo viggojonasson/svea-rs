@@ -23,21 +23,45 @@ async fn append_query(_req: Request, res: Response) -> Response {
     r
 }
 
+pub struct UserDB(Vec<(String, String)>);
+
 #[tokio::main]
 async fn main() {
-    Server::new("localhost".to_string(), 3000)
+    Server::builder()
+        .address("localhost".to_string())
+        .port(3000)
+        .state(UserDB {
+            0: vec![("John".to_string(), "Doe".to_string())],
+        })
         .router(
-            Router::builder().route(
-                Route::builder()
-                    .path(Path::builder().path("/").build())
-                    .handler(|_, _| async move {
-                        Response::builder()
-                            .status(Status::Ok)
-                            .body("<h1>Hello, world!</h1>")
-                            .build()
-                    })
-                    .build(),
-            ),
+            Router::builder()
+                .route(
+                    Route::builder()
+                        .path(Path::builder().path("/").build())
+                        .handler(|_, _| async move {
+                            Response::builder()
+                                .status(Status::Ok)
+                                .body("<h1>Hello, world!</h1>")
+                                .build()
+                        })
+                        .build(),
+                )
+                .route(
+                    Route::builder()
+                        .path(Path::builder().path("/users").build())
+                        .handler(|server, _| async move {
+                            let db = server.get_state::<UserDB>().unwrap();
+
+                            let mut body = String::new();
+
+                            for (first_name, last_name) in &db.0 {
+                                body.push_str(&format!("{} {}<br>", first_name, last_name));
+                            }
+
+                            Response::builder().status(Status::Ok).body(body).build()
+                        })
+                        .build(),
+                ),
         )
         .interceptor(
             Interceptor::builder()
@@ -51,6 +75,7 @@ async fn main() {
                 .body("<h1>Page you tried to access does not exist!</h1>")
                 .build()
         })
+        .build()
         .run()
         .await;
 }

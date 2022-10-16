@@ -3,9 +3,12 @@ use crate::{
     router::Router,
 };
 use futures::Future;
-use std::sync::Arc;
+use std::{any::Any, sync::Arc};
 use tokio::net::TcpListener;
 
+use self::builder::ServerBuilder;
+
+pub mod builder;
 pub mod connection;
 
 pub struct Server {
@@ -14,42 +17,35 @@ pub struct Server {
     pub router: Router,
     pub fallback: Option<Handler>,
     pub interceptors: Vec<Interceptor>,
+    pub states: Vec<Arc<dyn std::any::Any + Send + Sync>>,
+}
+
+impl Default for Server {
+    fn default() -> Self {
+        Self {
+            address: "localhost".to_string(),
+            port: 3000,
+            router: Router::default(),
+            fallback: None,
+            interceptors: Vec::new(),
+            states: Vec::new(),
+        }
+    }
 }
 
 impl Server {
-    pub fn new(address: String, port: u16) -> Self {
-        Self {
-            address,
-            port,
-            fallback: None,
-            interceptors: Vec::new(),
-            router: Router::default(),
+    pub fn builder() -> ServerBuilder {
+        ServerBuilder::new()
+    }
+
+    pub fn get_state<T: Any + Send + Sync>(&self) -> Option<&T> {
+        for state in &self.states {
+            if let Some(state) = state.downcast_ref::<T>() {
+                return Some(state);
+            }
         }
-    }
 
-    /// Set an router for this server.
-    /// TODO: Make the router pass an Path and allow for multiple routers.
-    pub fn router<R>(mut self, router: R) -> Self
-    where
-        R: Into<Router>,
-    {
-        self.router = router.into();
-        self
-    }
-
-    /// Sets the fallback handler for the server.
-    pub fn fallback<F, Fut>(mut self, fallback: F) -> Self
-    where
-        F: Fn(Arc<Server>, Request) -> Fut + 'static + Send + Sync,
-        Fut: Future<Output = Response> + 'static + Send + Sync,
-    {
-        self.fallback = Some(Handler::new(fallback));
-        self
-    }
-
-    pub fn interceptor(mut self, interceptor: impl Into<Interceptor>) -> Self {
-        self.interceptors.push(interceptor.into());
-        self
+        None
     }
 
     pub async fn run(self) {
