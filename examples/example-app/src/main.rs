@@ -1,9 +1,12 @@
+use std::sync::Arc;
+
 use webserver::{
     http::{QueryValue, Status},
     interceptor::Interceptor,
     path::Path,
     request::Request,
     response::Response,
+    router::{route::Route, Router},
     server::Server,
 };
 
@@ -20,15 +23,21 @@ async fn append_query(_req: Request, res: Response) -> Response {
     r
 }
 
+async fn handle_get_index(server: Arc<Server>, req: Request) -> Response {
+    Response::builder()
+        .status(Status::Ok)
+        .body("<h1>Hello, world!</h1>")
+        .build()
+}
+
 #[tokio::main]
 async fn main() {
+    let route = Route::new(Path::builder().path("/"), handle_get_index);
+
+    let router = Router::default().route(route);
+
     Server::new("localhost".to_string(), 3000)
-        .route(
-            Path::builder()
-                .path("/test")
-                .query("query", QueryValue::Bool(Some(false))),
-            |_req| "<h1>This is a test path</h1>".to_string().into(),
-        )
+        .router(router)
         .interceptor(
             Interceptor::builder()
                 .name("append query")

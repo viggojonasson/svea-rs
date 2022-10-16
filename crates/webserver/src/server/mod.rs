@@ -1,17 +1,17 @@
-use crate::server::routing::Routes;
-use crate::{interceptor::Interceptor, path::Path, request::Request, response::Response};
+use crate::{
+    interceptor::Interceptor, path::Path, request::Request, response::Response, router::Router,
+};
 use std::sync::Arc;
 use tokio::net::TcpListener;
 
 pub mod connection;
-pub mod routing;
 
 pub type Handler = Box<dyn Fn(Request) -> Response + Send + Sync>;
 
 pub struct Server {
     pub address: String,
     pub port: u16,
-    pub routes: Routes,
+    pub router: Router,
     pub fallback: Option<Handler>,
     pub interceptors: Vec<Interceptor>,
 }
@@ -21,10 +21,15 @@ impl Server {
         Self {
             address,
             port,
-            routes: Routes::new(),
             fallback: None,
             interceptors: Vec::new(),
+            router: Router::default(),
         }
+    }
+
+    pub fn router(mut self, router: Router) -> Self {
+        self.router = router;
+        self
     }
 
     pub fn fallback(
@@ -37,15 +42,6 @@ impl Server {
 
     pub fn interceptor(mut self, interceptor: impl Into<Interceptor>) -> Self {
         self.interceptors.push(interceptor.into());
-        self
-    }
-
-    pub fn route(
-        mut self,
-        path: impl Into<Path>,
-        handler: impl Fn(Request) -> Response + Send + Sync + 'static,
-    ) -> Self {
-        self.routes.add(path.into(), Box::new(handler));
         self
     }
 
