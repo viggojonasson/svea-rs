@@ -1,4 +1,7 @@
-use crate::{path::Path, request::Request, response::Response, router::Route, server::Server};
+use crate::{
+    handler::Handler, path::Path, request::Request, response::Response, router::Route,
+    server::Server,
+};
 use core::panic;
 use futures::Future;
 use std::sync::Arc;
@@ -22,7 +25,7 @@ impl RouteBuilder {
         RouteBuilder {
             route: Route {
                 path: Path::builder().path("/").build(),
-                handler: Box::new(move |s, r| Box::pin(handler(s, r))),
+                handler: Handler::new(handler),
             },
         }
     }
@@ -40,7 +43,7 @@ impl RouteBuilder {
         F: Fn(Arc<Server>, Request) -> Fut + 'static + Send + Sync,
         Fut: Future<Output = Response> + 'static + Send + Sync,
     {
-        self.route.handler = Box::new(move |s, r| Box::pin(handler(s, r)));
+        self.route.handler = Handler::new(handler);
 
         self
     }

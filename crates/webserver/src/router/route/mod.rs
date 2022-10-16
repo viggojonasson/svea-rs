@@ -1,15 +1,10 @@
-use crate::{
-    path::Path, request::Request, response::Response, router::route::builder::RouteBuilder,
-    server::Server,
-};
-use futures::future::BoxFuture;
-use std::sync::Arc;
+use crate::{handler::Handler, path::Path, router::route::builder::RouteBuilder};
 
 pub mod builder;
 
 pub struct Route {
     pub path: Path,
-    pub handler: Box<dyn Fn(Arc<Server>, Request) -> BoxFuture<'static, Response> + Sync + Send>,
+    pub handler: Handler,
 }
 
 impl Route {

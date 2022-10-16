@@ -46,13 +46,9 @@ pub async fn handle_connection(stream: &mut TcpStream, server: Arc<Server>) {
 
 pub async fn map_request(request: Request, server: Arc<Server>) -> Response {
     match server.router.find_matching_route(&request.path) {
-        Some(route) => {
-            let response = (route.handler)(server.clone(), request).await;
-
-            response
-        }
+        Some(route) => route.handler.handle(server.clone(), request).await,
         None => match &server.fallback {
-            Some(fallback) => fallback(request),
+            Some(fallback) => fallback.handle(server.clone(), request).await,
             None => Response::builder().status(Status::NotFound).build(),
         },
     }

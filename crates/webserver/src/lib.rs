@@ -1,3 +1,4 @@
+pub mod handler;
 pub mod interceptor;
 pub mod path;
 pub mod request;

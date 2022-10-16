@@ -1,12 +1,12 @@
 use crate::{
-    interceptor::Interceptor, path::Path, request::Request, response::Response, router::Router,
+    handler::Handler, interceptor::Interceptor, path::Path, request::Request, response::Response,
+    router::Router,
 };
+use futures::Future;
 use std::sync::Arc;
 use tokio::net::TcpListener;
 
 pub mod connection;
-
-pub type Handler = Box<dyn Fn(Request) -> Response + Send + Sync>;
 
 pub struct Server {
     pub address: String,
@@ -27,6 +27,8 @@ impl Server {
         }
     }
 
+    /// Set an router for this server.
+    /// TODO: Make the router pass an Path and allow for multiple routers.
     pub fn router<R>(mut self, router: R) -> Self
     where
         R: Into<Router>,
@@ -35,11 +37,13 @@ impl Server {
         self
     }
 
-    pub fn fallback(
-        mut self,
-        handler: impl Fn(Request) -> Response + Send + Sync + 'static,
-    ) -> Self {
-        self.fallback = Some(Box::new(handler));
+    /// Sets the fallback handler for the server.
+    pub fn fallback<F, Fut>(mut self, fallback: F) -> Self
+    where
+        F: Fn(Arc<Server>, Request) -> Fut + 'static + Send + Sync,
+        Fut: Future<Output = Response> + 'static + Send + Sync,
+    {
+        self.fallback = Some(Handler::new(fallback));
         self
     }
 
