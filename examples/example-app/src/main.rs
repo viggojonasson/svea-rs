@@ -23,13 +23,6 @@ async fn append_query(_req: Request, res: Response) -> Response {
     r
 }
 
-async fn handle_get_index(server: Arc<Server>, req: Request) -> Response {
-    Response::builder()
-        .status(Status::Ok)
-        .body("<h1>Hello, world!</h1>")
-        .build()
-}
-
 #[tokio::main]
 async fn main() {
     Server::new("localhost".to_string(), 3000)
@@ -37,7 +30,12 @@ async fn main() {
             Router::builder().route(
                 Route::builder()
                     .path(Path::builder().path("/").build())
-                    .handler(handle_get_index)
+                    .handler(|_, _| async move {
+                        Response::builder()
+                            .status(Status::Ok)
+                            .body("<h1>Hello, world!</h1>")
+                            .build()
+                    })
                     .build(),
             ),
         )
@@ -47,7 +45,7 @@ async fn main() {
                 .on_request(append_query)
                 .activate_on_all(true),
         )
-        .fallback(|_request| {
+        .fallback(|_, _| async move {
             Response::builder()
                 .status(Status::NotFound)
                 .body("<h1>Page you tried to access does not exist!</h1>")
