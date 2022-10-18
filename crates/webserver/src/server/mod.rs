@@ -57,13 +57,15 @@ impl Server {
             .await
             .unwrap();
 
-        loop {
-            let (mut stream, _) = listener.accept().await.unwrap();
+        tokio::spawn(async move {
+            loop {
+                let (mut stream, _) = listener.accept().await.unwrap();
 
-            let server = Arc::clone(&server);
-            tokio::spawn(async move {
-                connection::handle_connection(&mut stream, server).await;
-            });
-        }
+                let server = Arc::clone(&server);
+                tokio::spawn(async move {
+                    connection::handle_connection(&mut stream, server).await;
+                });
+            }
+        });
     }
 }
