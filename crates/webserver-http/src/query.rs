@@ -14,7 +14,27 @@ pub enum QueryValue {
     Bool(Option<bool>),
 }
 
-/// TODO: Can we make this less ugly?
+// TODO: Can we make this less ugly?
+impl QueryValue {
+    pub fn get_value(&self) -> Option<String> {
+        match self {
+            QueryValue::U8(value) => value.map(|value| value.to_string()),
+            QueryValue::U16(value) => value.map(|value| value.to_string()),
+            QueryValue::U32(value) => value.map(|value| value.to_string()),
+            QueryValue::U64(value) => value.map(|value| value.to_string()),
+            QueryValue::I8(value) => value.map(|value| value.to_string()),
+            QueryValue::I16(value) => value.map(|value| value.to_string()),
+            QueryValue::I32(value) => value.map(|value| value.to_string()),
+            QueryValue::I64(value) => value.map(|value| value.to_string()),
+            QueryValue::F32(value) => value.map(|value| value.to_string()),
+            QueryValue::F64(value) => value.map(|value| value.to_string()),
+            QueryValue::String(value) => value.clone(),
+            QueryValue::Bool(value) => value.map(|value| value.to_string()),
+        }
+    }
+}
+
+// TODO: Can we make this less ugly?
 impl PartialEq for QueryValue {
     fn eq(&self, other: &Self) -> bool {
         match self {

@@ -71,8 +71,7 @@ async fn main() {
 
 #[tokio::test]
 async fn test_application() {
-    use tokio::spawn;
-    use webserver::{router::Router, server::Server};
+    use webserver::{http::Method, router::Router, server::Server};
     use webserver_client::Client;
 
     let router = Router::builder().route(
@@ -88,11 +87,13 @@ async fn test_application() {
         .build()
         .run()
         .await;
-    println!("Sending request");
 
-    let client = Client::builder().address("localhost").port(3000).build();
+    let mut client = Client::builder().address("localhost").port(3000).build();
 
-    client.connect().await.send().await;
+    let res = client
+        .send(Request::builder().method(Method::GET).path("/").build())
+        .await
+        .unwrap();
 
-    panic!("");
+    assert_eq!(res.body, "hello");
 }

@@ -2,6 +2,10 @@ use crate::path::{parse_as_path, Path};
 use crate::Method;
 use std::collections::HashMap;
 
+use self::builder::RequestBuilder;
+
+pub mod builder;
+
 #[derive(Clone)]
 pub struct Request {
     pub body: String,
@@ -10,6 +14,47 @@ pub struct Request {
     pub headers: HashMap<String, String>,
     pub cookies: HashMap<String, String>,
     pub ip_address: Option<String>,
+}
+
+impl Default for Request {
+    fn default() -> Self {
+        Self {
+            body: String::new(),
+            method: Method::GET,
+            path: "/".into(),
+            headers: HashMap::new(),
+            cookies: HashMap::new(),
+            ip_address: None,
+        }
+    }
+}
+
+impl Request {
+    pub fn builder() -> RequestBuilder {
+        RequestBuilder::new()
+    }
+}
+
+impl ToString for Request {
+    fn to_string(&self) -> String {
+        let mut request = String::new();
+
+        request.push_str(&format!(
+            "{} {} HTTP/1.1\n",
+            self.method.to_string(),
+            self.path.to_string()
+        ));
+
+        for (key, value) in &self.headers {
+            request.push_str(&format!("{}: {}\n", key, value));
+        }
+
+        request.push_str("\n");
+
+        request.push_str(&self.body);
+
+        request
+    }
 }
 
 impl TryInto<Request> for String {

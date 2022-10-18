@@ -19,6 +19,29 @@ impl Path {
     }
 }
 
+impl ToString for Path {
+    fn to_string(&self) -> String {
+        let mut path = self.path.clone();
+
+        if !self.queries.0.is_empty() {
+            path.push('?');
+
+            for (key, value) in &self.queries.0 {
+                if let Some(val) = value.get_value() {
+                    path.push_str(&format!("{}={}&", key, val));
+                } else {
+                    path.push_str(&format!("{}&", key));
+                }
+            }
+
+            // Remove the last '&' character
+            path.pop();
+        }
+
+        path
+    }
+}
+
 impl Into<Path> for &str {
     fn into(self) -> Path {
         Path::builder().path(self).build()

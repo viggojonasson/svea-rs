@@ -11,13 +11,48 @@ pub struct Response {
     pub headers: HashMap<String, String>,
 }
 
-impl Into<Response> for String {
-    fn into(self) -> Response {
-        Response {
-            body: self,
-            status: Status::Ok,
-            headers: HashMap::new(),
+impl TryInto<Response> for String {
+    type Error = String;
+
+    fn try_into(self) -> Result<Response, Self::Error> {
+        let mut lines = self.lines();
+        let mut status = Status::Ok;
+        let mut headers = HashMap::new();
+        let mut body = String::new();
+
+        if let Some(line) = lines.next() {
+            let mut parts = line.split_whitespace();
+
+            if let Some(status_code) = parts.nth(1) {
+                if let Ok(status_code) = status_code.parse::<u16>() {
+                    status = Status::try_from(status_code).unwrap();
+                }
+            }
         }
+
+        for line in lines.clone() {
+            if line.is_empty() {
+                break;
+            }
+
+            let mut parts = line.splitn(2, ':');
+
+            if let Some(key) = parts.next() {
+                if let Some(value) = parts.next() {
+                    headers.insert(key.trim().to_string(), value.trim().to_string());
+                }
+            }
+        }
+
+        for line in lines {
+            body.push_str(&line.replace("\n", ""));
+        }
+
+        Ok(Response {
+            body,
+            status,
+            headers,
+        })
     }
 }
 
