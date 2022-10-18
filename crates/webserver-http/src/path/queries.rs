@@ -1,4 +1,4 @@
-use webserver_http::QueryValue;
+use crate::QueryValue;
 
 #[derive(PartialEq, Clone)]
 pub struct Queries(pub Vec<(String, QueryValue)>);

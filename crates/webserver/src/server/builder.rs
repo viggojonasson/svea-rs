@@ -1,11 +1,7 @@
-use std::sync::Arc;
-
+use crate::{handler::Handler, interceptor::Interceptor, router::Router, server::Server};
 use futures::Future;
-
-use crate::{
-    handler::Handler, interceptor::Interceptor, request::Request, response::Response,
-    router::Router, server::Server,
-};
+use std::sync::Arc;
+use webserver_http::{Request, Response};
 
 pub struct ServerBuilder {
     server: Server,

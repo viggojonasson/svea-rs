@@ -1,6 +1,5 @@
-use webserver_http::QueryValue;
-
 use crate::path::{queries::Queries, Path};
+use crate::QueryValue;
 
 impl Into<Path> for PathBuilder {
     fn into(self) -> Path {

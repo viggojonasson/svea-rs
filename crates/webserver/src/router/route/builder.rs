@@ -1,10 +1,8 @@
-use crate::{
-    handler::Handler, path::Path, request::Request, response::Response, router::Route,
-    server::Server,
-};
+use crate::{handler::Handler, router::Route, server::Server};
 use core::panic;
 use futures::Future;
 use std::sync::Arc;
+use webserver_http::{Path, Request, Response};
 
 pub struct RouteBuilder {
     route: Route,

@@ -1,7 +1,8 @@
 use crate::{
-    handler::Handler, interceptor::Interceptor, path::Path, request::Request, response::Response,
+    handler::Handler, interceptor::Interceptor,
     router::Router,
 };
+use webserver_http::{Path, Request, Response};
 use futures::Future;
 use std::{any::Any, sync::Arc};
 use tokio::net::TcpListener;

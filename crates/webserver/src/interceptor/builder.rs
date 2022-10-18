@@ -1,5 +1,6 @@
-use crate::{interceptor::Interceptor, request::Request, response::Response};
+use crate::interceptor::Interceptor;
 use futures::Future;
+use webserver_http::{Request, Response};
 
 pub struct InterceptorBuilder {
     interceptor: Interceptor,

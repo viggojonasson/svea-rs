@@ -1,6 +1,7 @@
-use crate::{request::Request, response::Response, server::Server};
+use crate::server::Server;
 use futures::{future::BoxFuture, Future};
 use std::sync::Arc;
+use webserver_http::{Request, Response};
 
 /// A function that handles a request and returns a response.
 pub struct Handler(Box<dyn Fn(Arc<Server>, Request) -> BoxFuture<'static, Response> + Sync + Send>);

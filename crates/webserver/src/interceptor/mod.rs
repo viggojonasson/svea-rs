@@ -1,5 +1,6 @@
-use crate::{interceptor::builder::InterceptorBuilder, request::Request, response::Response};
+use crate::interceptor::builder::InterceptorBuilder;
 use futures::future::BoxFuture;
+use webserver_http::{Request, Response};
 
 pub mod builder;
 

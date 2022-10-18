@@ -1,6 +1,6 @@
 use crate::path::{parse_as_path, Path};
+use crate::Method;
 use std::collections::HashMap;
-use webserver_http::Method;
 
 #[derive(Clone)]
 pub struct Request {
@@ -77,7 +77,7 @@ impl TryInto<Request> for String {
 
 #[cfg(test)]
 mod test {
-    use crate::http::method::Method;
+    use crate::Method;
 
     use super::Request;
 

@@ -1,8 +1,5 @@
 pub mod handler;
 pub mod interceptor;
-pub mod path;
-pub mod request;
-pub mod response;
 pub mod router;
 pub mod server;
 

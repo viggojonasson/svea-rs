@@ -1,5 +1,5 @@
 use crate::response::Response;
-use webserver_http::Status;
+use crate::Status;
 
 pub struct ResponseBuilder {
     response: Response,

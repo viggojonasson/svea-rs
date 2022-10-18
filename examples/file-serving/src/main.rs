@@ -1,7 +1,10 @@
 use std::sync::Arc;
 
 use tokio::fs::read_to_string;
-use webserver::{request::Request, response::Response, server::Server};
+use webserver::{
+    http::{Request, Response},
+    server::Server,
+};
 
 async fn read_from_fs(_server: Arc<Server>, request: Request) -> Response {
     let path = request.path.path;

@@ -1,11 +1,6 @@
-use std::sync::Arc;
-
 use webserver::{
-    http::{QueryValue, Status},
+    http::{Request, Response, Status},
     interceptor::Interceptor,
-    path::Path,
-    request::Request,
-    response::Response,
     router::{route::Route, Router},
     server::Server,
 };
@@ -72,4 +67,32 @@ async fn main() {
         .build()
         .run()
         .await;
+}
+
+#[tokio::test]
+async fn test_application() {
+    use tokio::spawn;
+    use webserver::{router::Router, server::Server};
+    use webserver_client::Client;
+
+    let router = Router::builder().route(
+        Route::builder()
+            .path("/")
+            .handler(|_, _| async move { Response::builder().body("hello").build() }),
+    );
+
+    Server::builder()
+        .address("localhost".to_string())
+        .port(3000)
+        .router(router)
+        .build()
+        .run()
+        .await;
+    println!("Sending request");
+
+    let client = Client::builder().address("localhost").port(3000).build();
+
+    client.connect().await.send().await;
+
+    panic!("");
 }

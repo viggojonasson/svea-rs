@@ -1,4 +1,5 @@
-use crate::{path::Path, router::builder::RouterBuilder, router::route::Route};
+use crate::{router::builder::RouterBuilder, router::route::Route};
+use webserver_http::Path;
 
 pub mod builder;
 pub mod route;
