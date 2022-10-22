@@ -1,9 +1,4 @@
-use crate::{
-    handler::Handler, interceptor::Interceptor,
-    router::Router,
-};
-use webserver_http::{Path, Request, Response};
-use futures::Future;
+use crate::{handler::Handler, interceptor::Interceptor, router::Router};
 use std::{any::Any, sync::Arc};
 use tokio::net::TcpListener;
 
@@ -49,7 +44,17 @@ impl Server {
         None
     }
 
+    /// Spawn a new task to run the server for you.
+    pub async fn spawn(self) {
+        self.run_server(true).await
+    }
+
+    /// Run the server.
     pub async fn run(self) {
+        self.run_server(false).await
+    }
+
+    async fn run_server(self, spawn: bool) {
         let server = Arc::new(self);
 
         println!("Listening on {}:{}", server.address, server.port);
@@ -58,7 +63,7 @@ impl Server {
             .await
             .unwrap();
 
-        tokio::spawn(async move {
+        let runner = || async move {
             loop {
                 let (mut stream, _) = listener.accept().await.unwrap();
 
@@ -67,6 +72,12 @@ impl Server {
                     connection::handle_connection(&mut stream, server).await;
                 });
             }
-        });
+        };
+
+        if spawn {
+            tokio::spawn(async move { runner().await });
+        } else {
+            runner().await
+        }
     }
 }

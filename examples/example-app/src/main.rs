@@ -64,7 +64,7 @@ mod tests {
 
     #[test]
     async fn test_get_users() {
-        get_server().run().await;
+        get_server().spawn().await;
 
         let mut client = Client::builder().address("localhost").port(3000).build();
 
@@ -79,7 +79,7 @@ mod tests {
 
     #[test]
     async fn test_not_found() {
-        get_server().run().await;
+        get_server().spawn().await;
 
         let mut client = Client::builder().address("localhost").port(3000).build();
 
@@ -97,7 +97,7 @@ mod tests {
 
     #[test]
     async fn test_index() {
-        get_server().run().await;
+        get_server().spawn().await;
 
         let mut client = Client::builder().address("localhost").port(3000).build();
 
