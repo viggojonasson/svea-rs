@@ -1,27 +1,10 @@
 use webserver::{
-    http::{Request, Response, Status},
-    interceptor::Interceptor,
+    http::{Response, Status},
     router::{route::Route, Router},
     server::Server,
 };
 
-async fn append_query(_req: Request, res: Response) -> Response {
-    let mut r = res;
-
-    r.body.push_str(
-        "
-<br>
-<h1>Intercepted!</h1>
-        ",
-    );
-
-    r
-}
-
-pub struct UserDB(Vec<(String, String)>);
-
-#[tokio::main]
-async fn main() {
+pub fn get_server() -> Server {
     Server::builder()
         .address("localhost".to_string())
         .port(3000)
@@ -48,15 +31,13 @@ async fn main() {
                                 body.push_str(&format!("{} {}<br>", first_name, last_name));
                             }
 
-                            Response::builder().status(Status::Ok).body(body).build()
+                            Response::builder()
+                                .status(Status::Ok)
+                                .body(body)
+                                .header("User-Amount", &format!("{}", db.0.len()))
+                                .build()
                         }),
                 ),
-        )
-        .interceptor(
-            Interceptor::builder()
-                .name("append query")
-                .on_request(append_query)
-                .activate_on_all(true),
         )
         .fallback(|_, _| async move {
             Response::builder()
@@ -65,35 +46,67 @@ async fn main() {
                 .build()
         })
         .build()
-        .run()
-        .await;
 }
 
-#[tokio::test]
-async fn test_application() {
-    use webserver::{http::Method, router::Router, server::Server};
+pub struct UserDB(Vec<(String, String)>);
+
+#[tokio::main]
+async fn main() {
+    get_server().run().await;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::get_server;
+    use tokio::test;
+    use webserver::http::{Request, Status};
     use webserver_client::Client;
 
-    let router = Router::builder().route(
-        Route::builder()
-            .path("/")
-            .handler(|_, _| async move { Response::builder().body("hello").build() }),
-    );
+    #[test]
+    async fn test_get_users() {
+        get_server().run().await;
 
-    Server::builder()
-        .address("localhost".to_string())
-        .port(3000)
-        .router(router)
-        .build()
-        .run()
-        .await;
+        let mut client = Client::builder().address("localhost").port(3000).build();
 
-    let mut client = Client::builder().address("localhost").port(3000).build();
+        let res = client
+            .send(Request::builder().path("/users").build())
+            .await
+            .unwrap();
 
-    let res = client
-        .send(Request::builder().method(Method::GET).path("/").build())
-        .await
-        .unwrap();
+        assert_eq!(res.status, Status::Ok);
+        assert_eq!(res.headers.get("User-Amount").unwrap(), "1");
+    }
 
-    assert_eq!(res.body, "hello");
+    #[test]
+    async fn test_not_found() {
+        get_server().run().await;
+
+        let mut client = Client::builder().address("localhost").port(3000).build();
+
+        let res = client
+            .send(Request::builder().path("/not-found").build())
+            .await
+            .unwrap();
+
+        assert_eq!(res.status, Status::NotFound);
+        assert_eq!(
+            res.body,
+            "<h1>Page you tried to access does not exist!</h1>"
+        );
+    }
+
+    #[test]
+    async fn test_index() {
+        get_server().run().await;
+
+        let mut client = Client::builder().address("localhost").port(3000).build();
+
+        let res = client
+            .send(Request::builder().path("/").build())
+            .await
+            .unwrap();
+
+        assert_eq!(res.status, Status::Ok);
+        assert_eq!(res.body, "<h1>Hello, world!</h1>");
+    }
 }
