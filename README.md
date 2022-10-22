@@ -1,6 +1,11 @@
 # webserver-rs
 
-Just playing around with Rust and web servers.
+Just playing around with Rust and web servers. Trying to learn rust.
+
+### Features
+
+- Blazingly slow
+- Unoptimized
 
 ## Run Examples:
 
