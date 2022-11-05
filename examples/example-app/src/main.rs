@@ -31,7 +31,12 @@ pub fn get_server() -> Server {
                         .status(Status::Ok)
                         .body(body)
                         .header("User-Amount", &format!("{}", db.0.len()))
-                })),
+                }))
+                .route(
+                    Route::new()
+                        .path("/into-response")
+                        .handler(|_, _| async move { "Hello, world!" }),
+                ),
         )
         .fallback(|_, _| async move {
             Response::new()

@@ -2,7 +2,7 @@ use crate::handler::Handler;
 use crate::server::Server;
 use std::future::Future;
 use std::sync::Arc;
-use webserver_http::{Path, Request, Response};
+use webserver_http::{IntoResponse, Path, Request};
 
 pub struct Route {
     pub path: Path,
@@ -13,8 +13,8 @@ impl Route {
     /// Create a new route with an empty handler
     /// Unless handler is given this will panic when being ran.
     pub fn new() -> Self {
-        async fn handler(_: Arc<Server>, _: Request) -> Response {
-            panic!("RouteBuilder::new() was called without setting a handler");
+        async fn handler(_: Arc<Server>, _: Request) -> String {
+            String::from("No handler was given for this route")
         }
 
         Self {
@@ -31,10 +31,11 @@ impl Route {
         self
     }
 
-    pub fn handler<F, Fut>(mut self, handler: F) -> Self
+    pub fn handler<F, Fut, R>(mut self, handler: F) -> Self
     where
         F: Fn(Arc<Server>, Request) -> Fut + 'static + Send + Sync,
-        Fut: Future<Output = Response> + 'static + Send + Sync,
+        Fut: Future<Output = R> + 'static + Send + Sync,
+        R: IntoResponse + 'static,
     {
         self.handler = Handler::new(handler);
 

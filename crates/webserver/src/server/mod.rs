@@ -2,7 +2,7 @@ use crate::{handler::Handler, interceptor::Interceptor, router::Router};
 use std::future::Future;
 use std::{any::Any, sync::Arc};
 use tokio::net::TcpListener;
-use webserver_http::{Request, Response};
+use webserver_http::{Path, Request, Response};
 
 pub mod connection;
 
@@ -13,6 +13,7 @@ pub struct Server {
     pub fallback: Option<Handler>,
     pub interceptors: Vec<Interceptor>,
     pub states: Vec<Arc<dyn std::any::Any + Send + Sync>>,
+    pub path: Option<Path>,
 }
 
 impl Default for Server {
@@ -24,6 +25,7 @@ impl Default for Server {
             fallback: None,
             interceptors: Vec::new(),
             states: Vec::new(),
+            path: None,
         }
     }
 }

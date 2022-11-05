@@ -1,5 +1,8 @@
 use crate::Status;
+pub use into_response::IntoResponse;
 use std::collections::hash_map::HashMap;
+
+mod into_response;
 
 #[derive(Debug, Clone)]
 pub struct Response {
