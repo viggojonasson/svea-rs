@@ -1,7 +1,6 @@
-use crate::{router::builder::RouterBuilder, router::route::Route};
+use crate::router::route::Route;
 use webserver_http::Path;
 
-pub mod builder;
 pub mod route;
 
 pub struct Router {
@@ -15,8 +14,16 @@ impl Default for Router {
 }
 
 impl Router {
-    pub fn builder() -> RouterBuilder {
-        RouterBuilder::new()
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn route<R>(mut self, route: R) -> Self
+    where
+        R: Into<Route>,
+    {
+        self.routes.push(route.into());
+        self
     }
 
     pub fn find_matching_route(&self, path: &Path) -> Option<&Route> {

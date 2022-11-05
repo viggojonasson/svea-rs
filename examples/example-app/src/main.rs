@@ -5,47 +5,39 @@ use webserver::{
 };
 
 pub fn get_server() -> Server {
-    Server::builder()
+    Server::new()
         .address("localhost".to_string())
         .port(3000)
         .state(UserDB {
             0: vec![("John".to_string(), "Doe".to_string())],
         })
         .router(
-            Router::builder()
-                .route(Route::builder().path("/").handler(|_, _| async move {
-                    Response::builder()
+            Router::new()
+                .route(Route::new().path("/").handler(|_, _| async move {
+                    Response::new()
                         .status(Status::Ok)
                         .body("<h1>Hello, world!</h1>")
-                        .build()
                 }))
-                .route(
-                    Route::builder()
-                        .path("/users")
-                        .handler(|server, _| async move {
-                            let db = server.get_state::<UserDB>().unwrap();
+                .route(Route::new().path("/users").handler(|server, _| async move {
+                    let db = server.get_state::<UserDB>().unwrap();
 
-                            let mut body = String::new();
+                    let mut body = String::new();
 
-                            for (first_name, last_name) in &db.0 {
-                                body.push_str(&format!("{} {}<br>", first_name, last_name));
-                            }
+                    for (first_name, last_name) in &db.0 {
+                        body.push_str(&format!("{} {}<br>", first_name, last_name));
+                    }
 
-                            Response::builder()
-                                .status(Status::Ok)
-                                .body(body)
-                                .header("User-Amount", &format!("{}", db.0.len()))
-                                .build()
-                        }),
-                ),
+                    Response::new()
+                        .status(Status::Ok)
+                        .body(body)
+                        .header("User-Amount", &format!("{}", db.0.len()))
+                })),
         )
         .fallback(|_, _| async move {
-            Response::builder()
+            Response::new()
                 .status(Status::NotFound)
                 .body("<h1>Page you tried to access does not exist!</h1>")
-                .build()
         })
-        .build()
 }
 
 pub struct UserDB(Vec<(String, String)>);
@@ -68,10 +60,7 @@ mod tests {
 
         let mut client = Client::builder().address("localhost").port(3000).build();
 
-        let res = client
-            .send(Request::builder().path("/users").build())
-            .await
-            .unwrap();
+        let res = client.send(Request::new().path("/users")).await.unwrap();
 
         assert_eq!(res.status, Status::Ok);
         assert_eq!(res.headers.get("User-Amount").unwrap(), "1");
@@ -84,7 +73,7 @@ mod tests {
         let mut client = Client::builder().address("localhost").port(3000).build();
 
         let res = client
-            .send(Request::builder().path("/not-found").build())
+            .send(Request::new().path("/not-found"))
             .await
             .unwrap();
 
@@ -101,10 +90,7 @@ mod tests {
 
         let mut client = Client::builder().address("localhost").port(3000).build();
 
-        let res = client
-            .send(Request::builder().path("/").build())
-            .await
-            .unwrap();
+        let res = client.send(Request::new().path("/")).await.unwrap();
 
         assert_eq!(res.status, Status::Ok);
         assert_eq!(res.body, "<h1>Hello, world!</h1>");

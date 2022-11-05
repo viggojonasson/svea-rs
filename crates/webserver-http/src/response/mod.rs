@@ -1,8 +1,5 @@
-use crate::response::builder::ResponseBuilder;
 use crate::Status;
 use std::collections::hash_map::HashMap;
-
-mod builder;
 
 #[derive(Debug, Clone)]
 pub struct Response {
@@ -71,8 +68,25 @@ impl Response {
         }
     }
 
-    pub fn builder() -> ResponseBuilder {
-        ResponseBuilder::new()
+    pub fn status(mut self, status: Status) -> Self {
+        self.status = status;
+        self
+    }
+
+    pub fn body<T>(mut self, body: T) -> Self
+    where
+        T: Into<String>,
+    {
+        self.body = body.into();
+        self
+    }
+
+    pub fn header<T>(mut self, key: T, value: T) -> Self
+    where
+        T: Into<String>,
+    {
+        self.headers.insert(key.into(), value.into());
+        self
     }
 }
 

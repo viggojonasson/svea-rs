@@ -2,10 +2,6 @@ use crate::path::{parse_as_path, Path};
 use crate::Method;
 use std::collections::HashMap;
 
-use self::builder::RequestBuilder;
-
-pub mod builder;
-
 #[derive(Clone)]
 pub struct Request {
     pub body: String,
@@ -30,8 +26,26 @@ impl Default for Request {
 }
 
 impl Request {
-    pub fn builder() -> RequestBuilder {
-        RequestBuilder::new()
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn method(mut self, method: Method) -> Self {
+        self.method = method;
+        self
+    }
+
+    pub fn path<P>(mut self, path: P) -> Self
+    where
+        P: Into<Path>,
+    {
+        self.path = path.into();
+        self
+    }
+
+    pub fn body(mut self, body: String) -> Self {
+        self.body = body;
+        self
     }
 }
 

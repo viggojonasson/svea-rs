@@ -20,18 +20,17 @@ async fn read_from_fs(_server: Arc<Server>, request: Request) -> Response {
     .await
     .unwrap();
 
-    Response::builder().body(file).build()
+    Response::new().body(file)
 }
 
 #[tokio::main]
 async fn main() {
     // We can use fallback to serve static files.
     // NOTE: Only works if we have no additional routes that would clash with the file path.
-    Server::builder()
+    Server::new()
         .port(3000)
         .address("localhost".to_string())
         .fallback(read_from_fs)
-        .build()
         .run()
         .await;
 }

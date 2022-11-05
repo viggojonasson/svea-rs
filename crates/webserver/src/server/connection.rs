@@ -13,7 +13,7 @@ pub async fn handle_connection(stream: &mut TcpStream, server: Arc<Server>) {
     let mut request: Request = match String::from_utf8_lossy(&buffer).to_string().try_into() {
         Ok(request) => request,
         Err(_) => {
-            let response = Response::builder().status(Status::BadRequest).build();
+            let response = Response::new().status(Status::BadRequest);
             stream
                 .write_all(String::from(response).as_bytes())
                 .await
@@ -49,7 +49,7 @@ pub async fn map_request(request: Request, server: Arc<Server>) -> Response {
         Some(route) => route.handler.handle(server.clone(), request).await,
         None => match &server.fallback {
             Some(fallback) => fallback.handle(server.clone(), request).await,
-            None => Response::builder().status(Status::NotFound).build(),
+            None => Response::new().status(Status::NotFound),
         },
     }
 }

@@ -1,10 +1,9 @@
 use crate::{handler::Handler, interceptor::Interceptor, router::Router};
+use std::future::Future;
 use std::{any::Any, sync::Arc};
 use tokio::net::TcpListener;
+use webserver_http::{Request, Response};
 
-use self::builder::ServerBuilder;
-
-pub mod builder;
 pub mod connection;
 
 pub struct Server {
@@ -30,10 +29,58 @@ impl Default for Server {
 }
 
 impl Server {
-    pub fn builder() -> ServerBuilder {
-        ServerBuilder::new()
+    pub fn new() -> Self {
+        Self::default()
     }
 
+    pub fn port(mut self, port: u16) -> Self {
+        self.port = port;
+        self
+    }
+
+    /// Set an router for this server.
+    /// TODO: Make the router pass an Path and allow for multiple routers.
+    pub fn router<R>(mut self, router: R) -> Self
+    where
+        R: Into<Router>,
+    {
+        self.router = router.into();
+        self
+    }
+
+    /// Sets the fallback handler for the server.
+    pub fn fallback<F, Fut>(mut self, fallback: F) -> Self
+    where
+        F: Fn(Arc<Server>, Request) -> Fut + 'static + Send + Sync,
+        Fut: Future<Output = Response> + 'static + Send + Sync,
+    {
+        self.fallback = Some(Handler::new(fallback));
+        self
+    }
+
+    /// Add an interceptor.
+    pub fn interceptor(mut self, interceptor: impl Into<Interceptor>) -> Self {
+        self.interceptors.push(interceptor.into());
+        self
+    }
+
+    /// Set the state of the server.
+    pub fn state<T: 'static + Send + Sync>(mut self, state: T) -> Self {
+        self.states.push(Arc::new(state));
+
+        self
+    }
+
+    /// Set the address of the server.
+    pub fn address<T>(mut self, address: T) -> Self
+    where
+        T: Into<String>,
+    {
+        self.address = address.into();
+        self
+    }
+
+    /// Get server state by type.
     pub fn get_state<T: Any + Send + Sync>(&self) -> Option<&T> {
         for state in &self.states {
             if let Some(state) = state.downcast_ref::<T>() {
