@@ -39,3 +39,5 @@ async fn main() {
 - - `cargo run --bin file-serving`
 - `example-app`
 - - `cargo run --bin example-app`
+- `readme-example`
+- - `cargo run --bin readme-example`
