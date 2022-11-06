@@ -10,6 +10,18 @@ impl IntoResponse for String {
     }
 }
 
+impl IntoResponse for (String, Status) {
+    fn into_response(&self) -> Response {
+        Response::new().body(&self.0).status(self.1.clone())
+    }
+}
+
+impl IntoResponse for Status {
+    fn into_response(&self) -> Response {
+        Response::new().status(self.clone())
+    }
+}
+
 impl IntoResponse for Response {
     fn into_response(&self) -> Response {
         self.clone()
@@ -19,12 +31,6 @@ impl IntoResponse for Response {
 impl IntoResponse for &str {
     fn into_response(&self) -> Response {
         Response::new().body(*self)
-    }
-}
-
-impl IntoResponse for Status {
-    fn into_response(&self) -> Response {
-        Response::new().status(self.clone())
     }
 }
 

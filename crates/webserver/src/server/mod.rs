@@ -2,7 +2,7 @@ use crate::{handler::Handler, interceptor::Interceptor, router::Router};
 use std::future::Future;
 use std::{any::Any, sync::Arc};
 use tokio::net::TcpListener;
-use webserver_http::{Path, Request, Response};
+use webserver_http::{IntoResponse, Path, Request};
 
 pub mod connection;
 
@@ -51,10 +51,11 @@ impl Server {
     }
 
     /// Sets the fallback handler for the server.
-    pub fn fallback<F, Fut>(mut self, fallback: F) -> Self
+    pub fn fallback<F, Fut, R>(mut self, fallback: F) -> Self
     where
         F: Fn(Arc<Server>, Request) -> Fut + 'static + Send + Sync,
-        Fut: Future<Output = Response> + 'static + Send + Sync,
+        Fut: Future<Output = R> + 'static + Send + Sync,
+        R: IntoResponse + 'static,
     {
         self.fallback = Some(Handler::new(fallback));
         self
