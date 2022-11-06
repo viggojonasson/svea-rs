@@ -1,26 +1,29 @@
 use std::sync::Arc;
-
 use tokio::fs::read_to_string;
 use webserver::{
-    http::{Request, Response},
+    http::{IntoResponse, Request, Response, Status},
     server::Server,
 };
 
-async fn read_from_fs(_server: Arc<Server>, request: Request) -> Response {
+async fn read_from_fs(_server: Arc<Server>, request: Request) -> (String, Status) {
     let path = request.path.path;
 
-    let file = read_to_string(format!(
+    match read_to_string(format!(
         "{}{}",
         "./examples/file-serving/static",
-        match path == "/" {
+        match &path == "/" {
             true => "/index.html",
             false => &path,
         }
     ))
     .await
-    .unwrap();
-
-    Response::new().body(file)
+    {
+        Ok(contents) => (contents, Status::Ok),
+        Err(e) => match e.kind() {
+            tokio::io::ErrorKind::NotFound => (String::from("File not found!"), Status::NotFound),
+            _ => (format!("Error: {}", e), Status::InternalServerError),
+        },
+    }
 }
 
 #[tokio::main]
