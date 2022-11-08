@@ -1,6 +1,4 @@
-use crate::path::{builder::PathBuilder, queries::Queries};
-
-pub mod builder;
+use crate::{path::queries::Queries, QueryValue};
 pub mod queries;
 
 #[derive(PartialEq, Clone)]
@@ -10,12 +8,26 @@ pub struct Path {
 }
 
 impl Path {
-    pub fn new(path: String, queries: Queries) -> Self {
-        Self { path, queries }
+    pub fn new() -> Self {
+        Self {
+            path: String::new(),
+            queries: Queries::new(),
+        }
     }
 
-    pub fn builder() -> PathBuilder {
-        PathBuilder::new()
+    pub fn path(mut self, path: impl Into<String>) -> Self {
+        self.path = path.into();
+        self
+    }
+
+    pub fn query(mut self, key: impl Into<String>, value: QueryValue) -> Self {
+        self.queries.insert(key.into(), value);
+        self
+    }
+
+    pub fn queries(mut self, queries: Queries) -> Self {
+        self.queries = queries;
+        self
     }
 }
 
@@ -44,7 +56,7 @@ impl ToString for Path {
 
 impl Into<Path> for &str {
     fn into(self) -> Path {
-        Path::builder().path(self).build()
+        Path::new().path(self)
     }
 }
 

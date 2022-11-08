@@ -18,7 +18,7 @@ impl Route {
         }
 
         Self {
-            path: Path::builder().path("/").build(),
+            path: Path::new().path("/"),
             handler: Handler::new(handler),
         }
     }
