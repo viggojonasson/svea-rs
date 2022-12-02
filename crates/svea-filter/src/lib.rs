@@ -1,9 +1,11 @@
-use svea_http::{BodyValue, Path, QueryValue, Request};
+use svea_http::{BodyValue, Method, Path, QueryValue, Request};
 
+#[derive(Default)]
 pub struct Filter {
     pub path: String,
     pub queries: Vec<(String, QueryFilter)>,
     pub body: Option<BodyFilter>,
+    pub methods: Vec<Method>,
 }
 
 impl Filter {
@@ -11,15 +13,27 @@ impl Filter {
         Self {
             path: path.into(),
             queries: Vec::new(),
-            body: None,
+            ..Default::default()
         }
     }
 
+    /// Filter a request by this method.
+    pub fn method(mut self, method: Method) -> Self {
+        if self.methods.contains(&method) {
+            return self;
+        }
+
+        self.methods.push(method);
+        self
+    }
+
+    /// Filter a request by a body filter.
     pub fn body(mut self, body: BodyFilter) -> Self {
         self.body = Some(body);
         self
     }
 
+    /// Filter a request by a query filter.
     pub fn query(mut self, name: impl Into<String>, filter: QueryFilter) -> Self {
         self.queries.push((name.into(), filter));
         self
@@ -27,6 +41,13 @@ impl Filter {
 
     /// Check if the request matches the filter.
     pub fn matches_request(&self, request: &Request) -> bool {
+        let method = &request.method;
+
+        // If we have no methods we assume that we want to match to all methods.
+        if self.methods.len() != 0 && !self.methods.contains(method) {
+            return false;
+        }
+
         let path = &request.path;
         let body = &request.body;
 

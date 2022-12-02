@@ -1,6 +1,6 @@
 use svea::{
     filter::{BodyFilter, Filter, QueryFilter},
-    http::{Response, Status},
+    http::{Method, Response, Status},
     router::{route::Route, Router},
     server::Server,
 };
@@ -18,6 +18,7 @@ pub fn get_server(port: u16) -> Server {
                     Route::new()
                         .filter(
                             Filter::new("/")
+                                .method(Method::POST)
                                 .query("pi", QueryFilter::NumberExact(3.14))
                                 .body(BodyFilter::StringExact("Hello!".to_string())),
                         )
@@ -68,7 +69,7 @@ async fn main() {
 #[cfg(test)]
 mod tests {
     use super::get_server;
-    use svea::http::{BodyValue, Request, Status};
+    use svea::http::{BodyValue, Method, Request, Status};
     use svea_client::Client;
     use tokio::test;
 
@@ -111,6 +112,7 @@ mod tests {
         let res = client
             .send(
                 Request::new()
+                    .method(Method::POST)
                     .path("/?pi=3.14")
                     .body(BodyValue::String("Hello!".to_string())),
             )
