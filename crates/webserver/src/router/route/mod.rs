@@ -2,10 +2,11 @@ use crate::handler::Handler;
 use crate::server::Server;
 use std::future::Future;
 use std::sync::Arc;
-use webserver_http::{IntoResponse, Path, Request};
+use webserver_filter::Filter;
+use webserver_http::{IntoResponse, Request};
 
 pub struct Route {
-    pub path: Path,
+    pub filter: Filter,
     pub handler: Handler,
 }
 
@@ -18,16 +19,26 @@ impl Route {
         }
 
         Self {
-            path: Path::new().path("/"),
+            filter: Filter::new("".to_string()),
             handler: Handler::new(handler),
         }
     }
 
+    /// Shorthand for setting the path for the filter.
     pub fn path<P>(mut self, path: P) -> Self
     where
-        P: Into<Path>,
+        P: Into<String>,
     {
-        self.path = path.into();
+        self.filter.path = path.into();
+        self
+    }
+
+    /// Add a filter to the route.
+    pub fn filter<P>(mut self, filter: P) -> Self
+    where
+        P: Into<Filter>,
+    {
+        self.filter = filter.into();
         self
     }
 

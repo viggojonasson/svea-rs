@@ -39,7 +39,7 @@ impl ToString for Path {
             path.push('?');
 
             for (key, value) in &self.queries.0 {
-                if let Some(val) = value.get_value() {
+                if let Some(val) = value.get_value_as_string() {
                     path.push_str(&format!("{}={}&", key, val));
                 } else {
                     path.push_str(&format!("{}&", key));

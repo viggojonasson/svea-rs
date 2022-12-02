@@ -1,16 +1,12 @@
 use crate::router::route::Route;
-use webserver_http::Path;
+use webserver_filter::Filter;
+use webserver_http::Request;
 
 pub mod route;
 
+#[derive(Default)]
 pub struct Router {
     pub routes: Vec<Route>,
-}
-
-impl Default for Router {
-    fn default() -> Self {
-        Self { routes: vec![] }
-    }
 }
 
 impl Router {
@@ -26,15 +22,9 @@ impl Router {
         self
     }
 
-    pub fn find_matching_route(&self, path: &Path) -> Option<&Route> {
+    pub fn find_matching_route(&self, request: &Request) -> Option<&Route> {
         for route in &self.routes {
-            if route.path.queries.0.len() == 0 {
-                if route.path.path == path.path {
-                    return Some(route);
-                }
-            }
-
-            if &route.path == path {
+            if route.filter.matches_request(request) {
                 return Some(route);
             }
         }

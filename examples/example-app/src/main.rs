@@ -1,40 +1,53 @@
 use webserver::{
+    filter::{BodyFilter, Filter, QueryFilter},
     http::{Response, Status},
     router::{route::Route, Router},
     server::Server,
 };
 
-pub fn get_server() -> Server {
+pub fn get_server(port: u16) -> Server {
     Server::new()
         .address("localhost".to_string())
-        .port(3000)
+        .port(port)
         .state(UserDB {
             0: vec![("John".to_string(), "Doe".to_string())],
         })
         .router(
             Router::new()
-                .route(Route::new().path("/").handler(|_, _| async move {
-                    Response::new()
-                        .status(Status::Ok)
-                        .body("<h1>Hello, world!</h1>")
-                }))
-                .route(Route::new().path("/users").handler(|server, _| async move {
-                    let db = server.get_state::<UserDB>().unwrap();
-
-                    let mut body = String::new();
-
-                    for (first_name, last_name) in &db.0 {
-                        body.push_str(&format!("{} {}<br>", first_name, last_name));
-                    }
-
-                    Response::new()
-                        .status(Status::Ok)
-                        .body(body)
-                        .header("User-Amount", &format!("{}", db.0.len()))
-                }))
                 .route(
                     Route::new()
-                        .path("/into-response")
+                        .filter(
+                            Filter::new("/")
+                                .query("pi", QueryFilter::NumberExact(3.14))
+                                .body(BodyFilter::StringExact("Hello!".to_string())),
+                        )
+                        .handler(|_, _| async move {
+                            Response::new()
+                                .status(Status::Ok)
+                                .body("<h1>Hello, world!</h1>")
+                        }),
+                )
+                .route(
+                    Route::new()
+                        .filter(Filter::new("/users"))
+                        .handler(|server, _| async move {
+                            let db = server.get_state::<UserDB>().unwrap();
+
+                            let mut body = String::new();
+
+                            for (first_name, last_name) in &db.0 {
+                                body.push_str(&format!("{} {}<br>", first_name, last_name));
+                            }
+
+                            Response::new()
+                                .status(Status::Ok)
+                                .body(body)
+                                .header("User-Amount", &format!("{}", db.0.len()))
+                        }),
+                )
+                .route(
+                    Route::new()
+                        .filter(Filter::new("/into-response"))
                         .handler(|_, _| async move { "Hello, world!" }),
                 ),
         )
@@ -49,19 +62,19 @@ pub struct UserDB(Vec<(String, String)>);
 
 #[tokio::main]
 async fn main() {
-    get_server().run().await;
+    get_server(3000).run().await;
 }
 
 #[cfg(test)]
 mod tests {
     use super::get_server;
     use tokio::test;
-    use webserver::http::{Request, Status};
+    use webserver::http::{BodyValue, Request, Status};
     use webserver_client::Client;
 
     #[test]
     async fn test_get_users() {
-        get_server().spawn().await;
+        get_server(3000).spawn().await;
 
         let mut client = Client::builder().address("localhost").port(3000).build();
 
@@ -73,9 +86,9 @@ mod tests {
 
     #[test]
     async fn test_not_found() {
-        get_server().spawn().await;
+        get_server(3001).spawn().await;
 
-        let mut client = Client::builder().address("localhost").port(3000).build();
+        let mut client = Client::builder().address("localhost").port(3001).build();
 
         let res = client
             .send(Request::new().path("/not-found"))
@@ -91,11 +104,18 @@ mod tests {
 
     #[test]
     async fn test_index() {
-        get_server().spawn().await;
+        get_server(3002).spawn().await;
 
-        let mut client = Client::builder().address("localhost").port(3000).build();
+        let mut client = Client::builder().address("localhost").port(3002).build();
 
-        let res = client.send(Request::new().path("/")).await.unwrap();
+        let res = client
+            .send(
+                Request::new()
+                    .path("/?pi=3.14")
+                    .body(BodyValue::String("Hello!".to_string())),
+            )
+            .await
+            .unwrap();
 
         assert_eq!(res.status, Status::Ok);
         assert_eq!(res.body, "<h1>Hello, world!</h1>");
