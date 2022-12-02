@@ -24,6 +24,16 @@ impl Route {
         }
     }
 
+    /// Shorthand for setting the path for the filter.
+    pub fn path<P>(mut self, path: P) -> Self
+    where
+        P: Into<String>,
+    {
+        self.filter.path = path.into();
+        self
+    }
+
+    /// Add a filter to the route.
     pub fn filter<P>(mut self, filter: P) -> Self
     where
         P: Into<Filter>,

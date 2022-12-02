@@ -1,10 +1,10 @@
 use crate::path::{parse_as_path, Path};
-use crate::Method;
+use crate::{parse_body, BodyValue, Method};
 use std::collections::HashMap;
 
 #[derive(Clone)]
 pub struct Request {
-    pub body: String,
+    pub body: BodyValue,
     pub method: Method,
     pub path: Path,
     pub headers: HashMap<String, String>,
@@ -15,7 +15,7 @@ pub struct Request {
 impl Default for Request {
     fn default() -> Self {
         Self {
-            body: String::new(),
+            body: BodyValue::Empty,
             method: Method::GET,
             path: "/".into(),
             headers: HashMap::new(),
@@ -43,7 +43,7 @@ impl Request {
         self
     }
 
-    pub fn body(mut self, body: String) -> Self {
+    pub fn body(mut self, body: BodyValue) -> Self {
         self.body = body;
         self
     }
@@ -65,7 +65,7 @@ impl ToString for Request {
 
         request.push_str("\n");
 
-        request.push_str(&self.body);
+        request.push_str(&self.body.to_string());
 
         request
     }
@@ -120,6 +120,13 @@ impl TryInto<Request> for String {
         // ?
         let body = body.trim().to_string();
 
+        // TODO: Understand why this happens?
+        // Currently the body gets filled with \0\0\0\0.... many times...
+        // TCP Magic or just poor parsing?
+        let body = body.replace("\0", "");
+
+        let body = parse_body(body, headers.get("Content-Type")).unwrap();
+
         let path = parse_as_path(path);
 
         Ok(Request {
@@ -136,7 +143,7 @@ impl TryInto<Request> for String {
 
 #[cfg(test)]
 mod test {
-    use crate::Method;
+    use crate::{BodyValue, Method};
 
     use super::Request;
 
@@ -158,7 +165,10 @@ mod test {
         let parsed: Request = request.try_into().unwrap();
 
         assert_eq!(parsed.method, Method::GET);
-        assert_eq!(parsed.body, "Hello, World!");
+        assert_eq!(
+            parsed.body,
+            BodyValue::String(String::from("Hello, World!"))
+        );
         assert_eq!(parsed.headers.get("Host").unwrap(), "localhost:8080");
         assert_eq!(parsed.cookies.get("test").unwrap(), "123")
     }

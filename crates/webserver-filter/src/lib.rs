@@ -1,9 +1,9 @@
-use webserver_http::{Path, QueryValue};
+use webserver_http::{BodyValue, Path, QueryValue, Request};
 
 pub struct Filter {
     pub path: String,
     pub queries: Vec<(String, QueryFilter)>,
-    pub body: Option<QueryFilter>,
+    pub body: Option<BodyFilter>,
 }
 
 impl Filter {
@@ -15,11 +15,37 @@ impl Filter {
         }
     }
 
+    pub fn body(mut self, body: BodyFilter) -> Self {
+        self.body = Some(body);
+        self
+    }
+
     pub fn query(mut self, name: impl Into<String>, filter: QueryFilter) -> Self {
         self.queries.push((name.into(), filter));
         self
     }
 
+    /// Check if the request matches the filter.
+    pub fn matches_request(&self, request: &Request) -> bool {
+        let path = &request.path;
+        let body = &request.body;
+
+        // Check first if the path matches.
+        if !self.matches_path(&path) {
+            return false;
+        }
+
+        // If it does, check if the body matches.
+        if let Some(body_filter) = &self.body {
+            if !body_filter.cmp_body_value(&body) {
+                return false;
+            }
+        }
+
+        true
+    }
+
+    /// Check if the path matches the filter. (Does not check body (obviously))
     pub fn matches_path(&self, path: &Path) -> bool {
         if self.path != path.path {
             return false;
@@ -41,106 +67,31 @@ impl Filter {
 
 pub enum QueryFilter {
     String,
-    U8,
-    U16,
-    U32,
-    U64,
-    I8,
-    I16,
-    I32,
-    I64,
-    F32,
-    F64,
+    Number,
     Bool,
+    StringExact(String),
+    NumberExact(f64),
+    BoolExact(bool),
 }
 
 impl QueryFilter {
     fn cmp_query_value(&self, value: &QueryValue) -> bool {
         match value {
-            QueryValue::Bool(_) => {
-                if self == &QueryFilter::Bool {
-                    true
-                } else {
-                    false
-                }
-            }
-            QueryValue::String(_) => {
-                if self == &QueryFilter::String {
-                    true
-                } else {
-                    false
-                }
-            }
-            QueryValue::U8(_) => {
-                if self == &QueryFilter::U8 {
-                    true
-                } else {
-                    false
-                }
-            }
-            QueryValue::U16(_) => {
-                if self == &QueryFilter::U16 {
-                    true
-                } else {
-                    false
-                }
-            }
-            QueryValue::U32(_) => {
-                if self == &QueryFilter::U32 {
-                    true
-                } else {
-                    false
-                }
-            }
-            QueryValue::U64(_) => {
-                if self == &QueryFilter::U64 {
-                    true
-                } else {
-                    false
-                }
-            }
-            QueryValue::I8(_) => {
-                if self == &QueryFilter::I8 {
-                    true
-                } else {
-                    false
-                }
-            }
-            QueryValue::I16(_) => {
-                if self == &QueryFilter::I16 {
-                    true
-                } else {
-                    false
-                }
-            }
-            QueryValue::I32(_) => {
-                if self == &QueryFilter::I32 {
-                    true
-                } else {
-                    false
-                }
-            }
-            QueryValue::I64(_) => {
-                if self == &QueryFilter::I64 {
-                    true
-                } else {
-                    false
-                }
-            }
-            QueryValue::F32(_) => {
-                if self == &QueryFilter::F32 {
-                    true
-                } else {
-                    false
-                }
-            }
-            QueryValue::F64(_) => {
-                if self == &QueryFilter::F64 {
-                    true
-                } else {
-                    false
-                }
-            }
+            QueryValue::Bool(b1) => match self {
+                QueryFilter::Bool => true,
+                QueryFilter::BoolExact(b2) => b1 == b2,
+                _ => false,
+            },
+            QueryValue::String(s1) => match self {
+                QueryFilter::StringExact(s2) => s1 == s2,
+                QueryFilter::String => true,
+                _ => false,
+            },
+            QueryValue::Number(n1) => match self {
+                QueryFilter::NumberExact(n2) => n1 == n2,
+                QueryFilter::Number => true,
+                _ => false,
+            },
             _ => false,
         }
     }
@@ -150,18 +101,11 @@ impl PartialEq for QueryFilter {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (QueryFilter::String, QueryFilter::String) => true,
-            (QueryFilter::U8, QueryFilter::U8) => true,
-            (QueryFilter::U16, QueryFilter::U16) => true,
-            (QueryFilter::U32, QueryFilter::U32) => true,
-            (QueryFilter::U64, QueryFilter::U64) => true,
-            (QueryFilter::I8, QueryFilter::I8) => true,
-            (QueryFilter::I16, QueryFilter::I16) => true,
-            (QueryFilter::I32, QueryFilter::I32) => true,
-            (QueryFilter::I64, QueryFilter::I64) => true,
-            (QueryFilter::F32, QueryFilter::F32) => true,
-            (QueryFilter::F64, QueryFilter::F64) => true,
+            (QueryFilter::Number, QueryFilter::Number) => true,
             (QueryFilter::Bool, QueryFilter::Bool) => true,
-
+            (QueryFilter::StringExact(a), QueryFilter::StringExact(b)) => a == b,
+            (QueryFilter::NumberExact(a), QueryFilter::NumberExact(b)) => a == b,
+            (QueryFilter::BoolExact(a), QueryFilter::BoolExact(b)) => a == b,
             _ => false,
         }
     }
@@ -169,15 +113,18 @@ impl PartialEq for QueryFilter {
 
 pub enum BodyFilter {
     String,
-    U8,
-    U16,
-    U32,
-    U64,
-    I8,
-    I16,
-    I32,
-    I64,
-    F32,
-    F64,
-    Bool,
+    StringExact(String),
+}
+
+impl BodyFilter {
+    fn cmp_body_value(&self, other: &BodyValue) -> bool {
+        match other {
+            BodyValue::String(s1) => match self {
+                BodyFilter::StringExact(s2) => s1 == s2,
+                BodyFilter::String => true,
+                _ => false,
+            },
+            _ => false,
+        }
+    }
 }

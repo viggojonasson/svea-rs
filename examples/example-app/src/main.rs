@@ -1,5 +1,5 @@
 use webserver::{
-    filter::{Filter, QueryFilter},
+    filter::{BodyFilter, Filter, QueryFilter},
     http::{Response, Status},
     router::{route::Route, Router},
     server::Server,
@@ -16,7 +16,11 @@ pub fn get_server(port: u16) -> Server {
             Router::new()
                 .route(
                     Route::new()
-                        .filter(Filter::new("/").query("test", QueryFilter::Bool))
+                        .filter(
+                            Filter::new("/")
+                                .query("pi", QueryFilter::NumberExact(3.14))
+                                .body(BodyFilter::StringExact("Hello!".to_string())),
+                        )
                         .handler(|_, _| async move {
                             Response::new()
                                 .status(Status::Ok)
@@ -65,7 +69,7 @@ async fn main() {
 mod tests {
     use super::get_server;
     use tokio::test;
-    use webserver::http::{Request, Status};
+    use webserver::http::{BodyValue, Request, Status};
     use webserver_client::Client;
 
     #[test]
@@ -105,7 +109,11 @@ mod tests {
         let mut client = Client::builder().address("localhost").port(3002).build();
 
         let res = client
-            .send(Request::new().path("/?test=true"))
+            .send(
+                Request::new()
+                    .path("/?pi=3.14")
+                    .body(BodyValue::String("Hello!".to_string())),
+            )
             .await
             .unwrap();
 
