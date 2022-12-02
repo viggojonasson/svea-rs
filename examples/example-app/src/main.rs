@@ -1,4 +1,5 @@
 use webserver::{
+    filter::Filter,
     http::{Response, Status},
     router::{route::Route, Router},
     server::Server,
@@ -13,28 +14,36 @@ pub fn get_server() -> Server {
         })
         .router(
             Router::new()
-                .route(Route::new().path("/").handler(|_, _| async move {
-                    Response::new()
-                        .status(Status::Ok)
-                        .body("<h1>Hello, world!</h1>")
-                }))
-                .route(Route::new().path("/users").handler(|server, _| async move {
-                    let db = server.get_state::<UserDB>().unwrap();
-
-                    let mut body = String::new();
-
-                    for (first_name, last_name) in &db.0 {
-                        body.push_str(&format!("{} {}<br>", first_name, last_name));
-                    }
-
-                    Response::new()
-                        .status(Status::Ok)
-                        .body(body)
-                        .header("User-Amount", &format!("{}", db.0.len()))
-                }))
                 .route(
                     Route::new()
-                        .path("/into-response")
+                        .filter(Filter::new("/"))
+                        .handler(|_, _| async move {
+                            Response::new()
+                                .status(Status::Ok)
+                                .body("<h1>Hello, world!</h1>")
+                        }),
+                )
+                .route(
+                    Route::new()
+                        .filter(Filter::new("/users"))
+                        .handler(|server, _| async move {
+                            let db = server.get_state::<UserDB>().unwrap();
+
+                            let mut body = String::new();
+
+                            for (first_name, last_name) in &db.0 {
+                                body.push_str(&format!("{} {}<br>", first_name, last_name));
+                            }
+
+                            Response::new()
+                                .status(Status::Ok)
+                                .body(body)
+                                .header("User-Amount", &format!("{}", db.0.len()))
+                        }),
+                )
+                .route(
+                    Route::new()
+                        .filter(Filter::new("/into-response"))
                         .handler(|_, _| async move { "Hello, world!" }),
                 ),
         )

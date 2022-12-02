@@ -11,6 +11,7 @@ Just playing around with Rust and web servers. Trying to learn rust.
 
 ```rs
 use webserver::{
+    filter::Filter,
     http::Status,
     router::{route::Route, Router},
     server::Server,
@@ -24,7 +25,7 @@ async fn main() {
         .router(
             Router::new().route(
                 Route::new()
-                    .path("/")
+                    .filter(Filter::new("/"))
                     .handler(|_, _| async move { ("Hello, World!", Status::ImATeapot) }),
             ),
         )
