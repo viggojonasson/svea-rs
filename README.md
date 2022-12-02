@@ -45,7 +45,6 @@ Server::new()
     .router(
         Router::new().route(
             Route::new()
-                .path("/")
                 .filter(
                     Filter::new("/")
                         .query("pi", QueryFilter::NumberExact(3.14))
