@@ -1,7 +1,7 @@
 use crate::server::Server;
 use futures::{future::BoxFuture, Future};
 use std::sync::Arc;
-use webserver_http::{IntoResponse, Request, Response};
+use svea_http::{IntoResponse, Request, Response};
 
 /// A function that handles a request and returns a response.
 pub struct Handler(

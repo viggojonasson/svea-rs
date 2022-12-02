@@ -1,8 +1,8 @@
+use svea_http::{Request, Response};
 use tokio::{
     io::{self, AsyncReadExt, AsyncWriteExt},
     net::TcpStream,
 };
-use webserver_http::{Request, Response};
 
 pub struct Client<'a> {
     port: u16,

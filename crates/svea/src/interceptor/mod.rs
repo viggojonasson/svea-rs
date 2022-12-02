@@ -1,5 +1,5 @@
 use futures::{future::BoxFuture, Future};
-use webserver_http::{Request, Response};
+use svea_http::{Request, Response};
 
 /// TODO: Make this only need a reference to a request and a response.
 /// TODO: Make the on_request get a mutable response instead of it having to return a new one.

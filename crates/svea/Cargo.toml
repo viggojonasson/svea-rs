@@ -1,10 +1,10 @@
 [package]
-name = "webserver"
+name = "svea"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
 tokio = {version = "1.21.2", features = ["full"] }
-webserver-http = { path = "../webserver-http" }
+svea-http = { path = "../svea-http" }
 futures = "0.3.24"
-webserver-filter = { path = "../webserver-filter" }
+svea-filter = { path = "../svea-filter" }

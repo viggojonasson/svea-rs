@@ -1,9 +1,9 @@
 use std::sync::Arc;
-use tokio::fs::read_to_string;
-use webserver::{
+use svea::{
     http::{IntoResponse, Request, Response, Status},
     server::Server,
 };
+use tokio::fs::read_to_string;
 
 async fn read_from_fs(_server: Arc<Server>, request: Request) -> (String, Status) {
     let path = request.path.path;

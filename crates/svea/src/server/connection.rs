@@ -1,10 +1,10 @@
 use crate::server::Server;
 use std::sync::Arc;
+use svea_http::{Request, Response, Status};
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::TcpStream,
 };
-use webserver_http::{Request, Response, Status};
 
 pub async fn handle_connection(stream: &mut TcpStream, server: Arc<Server>) {
     let mut buffer = [0; 1024];

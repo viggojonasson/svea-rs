@@ -2,8 +2,8 @@ use crate::handler::Handler;
 use crate::server::Server;
 use std::future::Future;
 use std::sync::Arc;
-use webserver_filter::Filter;
-use webserver_http::{IntoResponse, Request};
+use svea_filter::Filter;
+use svea_http::{IntoResponse, Request};
 
 pub struct Route {
     pub filter: Filter,

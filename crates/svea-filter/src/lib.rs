@@ -1,4 +1,4 @@
-use webserver_http::{BodyValue, Path, QueryValue, Request};
+use svea_http::{BodyValue, Path, QueryValue, Request};
 
 pub struct Filter {
     pub path: String,

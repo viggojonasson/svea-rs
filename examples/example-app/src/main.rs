@@ -1,4 +1,4 @@
-use webserver::{
+use svea::{
     filter::{BodyFilter, Filter, QueryFilter},
     http::{Response, Status},
     router::{route::Route, Router},
@@ -68,9 +68,9 @@ async fn main() {
 #[cfg(test)]
 mod tests {
     use super::get_server;
+    use svea::http::{BodyValue, Request, Status};
+    use svea_client::Client;
     use tokio::test;
-    use webserver::http::{BodyValue, Request, Status};
-    use webserver_client::Client;
 
     #[test]
     async fn test_get_users() {
