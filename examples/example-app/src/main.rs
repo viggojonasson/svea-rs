@@ -1,14 +1,14 @@
 use webserver::{
-    filter::Filter,
+    filter::{Filter, QueryFilter},
     http::{Response, Status},
     router::{route::Route, Router},
     server::Server,
 };
 
-pub fn get_server() -> Server {
+pub fn get_server(port: u16) -> Server {
     Server::new()
         .address("localhost".to_string())
-        .port(3000)
+        .port(port)
         .state(UserDB {
             0: vec![("John".to_string(), "Doe".to_string())],
         })
@@ -16,7 +16,7 @@ pub fn get_server() -> Server {
             Router::new()
                 .route(
                     Route::new()
-                        .filter(Filter::new("/"))
+                        .filter(Filter::new("/").query("test", QueryFilter::Bool))
                         .handler(|_, _| async move {
                             Response::new()
                                 .status(Status::Ok)
@@ -58,7 +58,7 @@ pub struct UserDB(Vec<(String, String)>);
 
 #[tokio::main]
 async fn main() {
-    get_server().run().await;
+    get_server(3000).run().await;
 }
 
 #[cfg(test)]
@@ -70,7 +70,7 @@ mod tests {
 
     #[test]
     async fn test_get_users() {
-        get_server().spawn().await;
+        get_server(3000).spawn().await;
 
         let mut client = Client::builder().address("localhost").port(3000).build();
 
@@ -82,9 +82,9 @@ mod tests {
 
     #[test]
     async fn test_not_found() {
-        get_server().spawn().await;
+        get_server(3001).spawn().await;
 
-        let mut client = Client::builder().address("localhost").port(3000).build();
+        let mut client = Client::builder().address("localhost").port(3001).build();
 
         let res = client
             .send(Request::new().path("/not-found"))
@@ -100,11 +100,14 @@ mod tests {
 
     #[test]
     async fn test_index() {
-        get_server().spawn().await;
+        get_server(3002).spawn().await;
 
-        let mut client = Client::builder().address("localhost").port(3000).build();
+        let mut client = Client::builder().address("localhost").port(3002).build();
 
-        let res = client.send(Request::new().path("/")).await.unwrap();
+        let res = client
+            .send(Request::new().path("/?test=true"))
+            .await
+            .unwrap();
 
         assert_eq!(res.status, Status::Ok);
         assert_eq!(res.body, "<h1>Hello, world!</h1>");

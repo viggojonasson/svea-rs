@@ -24,7 +24,7 @@ impl Router {
 
     pub fn find_matching_route(&self, request: &Request) -> Option<&Route> {
         for route in &self.routes {
-            if request.path.path == route.filter.path {
+            if route.filter.matches_path(&request.path) {
                 return Some(route);
             }
         }
