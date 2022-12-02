@@ -1,5 +1,4 @@
 use crate::router::route::Route;
-use svea_filter::Filter;
 use svea_http::Request;
 
 pub mod route;

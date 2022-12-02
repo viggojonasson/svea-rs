@@ -8,7 +8,7 @@ use tokio::{
 
 pub async fn handle_connection(stream: &mut TcpStream, server: Arc<Server>) {
     let mut buffer = [0; 1024];
-    stream.read(&mut buffer).await.unwrap();
+    let _read = stream.read(&mut buffer).await.unwrap();
 
     let mut request: Request = match String::from_utf8_lossy(&buffer).to_string().try_into() {
         Ok(request) => request,
@@ -22,9 +22,8 @@ pub async fn handle_connection(stream: &mut TcpStream, server: Arc<Server>) {
         }
     };
 
-    match stream.peer_addr() {
-        Ok(addr) => request.ip_address = Some(addr.ip().to_string()),
-        Err(_) => {}
+    if let Ok(addr) = stream.peer_addr() {
+        request.ip_address = Some(addr.ip().to_string());
     }
 
     let mut response = map_request(request.clone(), server.clone()).await;
@@ -36,7 +35,7 @@ pub async fn handle_connection(stream: &mut TcpStream, server: Arc<Server>) {
         }
     }
 
-    stream
+    let _written = stream
         .write(String::from(response).as_bytes())
         .await
         .unwrap();

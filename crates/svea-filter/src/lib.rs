@@ -92,7 +92,6 @@ impl QueryFilter {
                 QueryFilter::Number => true,
                 _ => false,
             },
-            _ => false,
         }
     }
 }
@@ -122,7 +121,6 @@ impl BodyFilter {
             BodyValue::String(s1) => match self {
                 BodyFilter::StringExact(s2) => s1 == s2,
                 BodyFilter::String => true,
-                _ => false,
             },
             _ => false,
         }

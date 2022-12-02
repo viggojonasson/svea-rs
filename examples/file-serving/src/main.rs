@@ -1,6 +1,6 @@
 use std::sync::Arc;
 use svea::{
-    http::{IntoResponse, Request, Response, Status},
+    http::{Request, Status},
     server::Server,
 };
 use tokio::fs::read_to_string;

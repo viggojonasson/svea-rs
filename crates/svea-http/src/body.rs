@@ -10,7 +10,7 @@ pub fn parse_body(
     body: String,
     content_type: Option<&String>,
 ) -> Result<BodyValue, Box<dyn std::error::Error>> {
-    if let Some(content_type) = content_type {}
+    if let Some(_content_type) = content_type {}
 
     Ok(BodyValue::String(body))
 }

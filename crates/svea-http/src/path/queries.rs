@@ -31,8 +31,4 @@ impl Queries {
 
         None
     }
-
-    pub fn remove_by_key(&mut self, key: String) -> bool {
-        todo!();
-    }
 }
