@@ -3,6 +3,7 @@ use svea_http::Request;
 
 pub mod route;
 
+// TODO: Add base path to the router.
 #[derive(Default)]
 pub struct Router {
     pub routes: Vec<Route>,
@@ -13,6 +14,7 @@ impl Router {
         Self::default()
     }
 
+    /// Add a route to this router.
     pub fn route<R>(mut self, route: R) -> Self
     where
         R: Into<Route>,

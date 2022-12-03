@@ -8,6 +8,17 @@ pub struct Handler(
     Box<dyn Fn(Arc<Server>, Request) -> BoxFuture<'static, Box<dyn IntoResponse>> + Sync + Send>,
 );
 
+impl Default for Handler {
+    fn default() -> Self {
+        async fn handler(_: Arc<Server>, _r: Request) -> String {
+            println!("WARNING: No handler set for this route");
+            String::from("No handler set for this route")
+        }
+
+        Self::new(handler)
+    }
+}
+
 impl Handler {
     pub fn new<F, Fut, R>(handler: F) -> Self
     where

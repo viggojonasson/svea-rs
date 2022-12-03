@@ -12,15 +12,11 @@ pub struct Route {
 
 impl Route {
     /// Create a new route with an empty handler
-    /// Unless handler is given this will panic when being ran.
+    /// Unless a handler is set, this route will print a warning message and just return a message saying that no handler was set
     pub fn new() -> Self {
-        async fn handler(_: Arc<Server>, _: Request) -> String {
-            String::from("No handler was given for this route")
-        }
-
         Self {
             filter: Filter::new("".to_string()),
-            handler: Handler::new(handler),
+            handler: Handler::default(),
         }
     }
 
@@ -42,6 +38,7 @@ impl Route {
         self
     }
 
+    /// Set the handler for the route.
     pub fn handler<F, Fut, R>(mut self, handler: F) -> Self
     where
         F: Fn(Arc<Server>, Request) -> Fut + 'static + Send + Sync,
