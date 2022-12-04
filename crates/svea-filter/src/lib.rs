@@ -176,3 +176,55 @@ impl BodyFilter {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::Filter;
+    use crate::QueryFilter;
+    use svea_http::{Method, Path, QueryValue, Request};
+
+    fn create_request() -> Request {
+        let path = Path::new()
+            .query("Test-Query", QueryValue::Number(420.0))
+            .path("/");
+        Request::new()
+            .header("Test-Header", "Value")
+            .method(Method::GET)
+            .path(path)
+    }
+
+    #[test]
+    fn test_header_filter() {
+        let req = create_request();
+        let filter_exact = Filter::new("/").header("Test-Header", Some(String::from("Value")));
+        let filter_any = Filter::new("/").header("Test-Header", None);
+        let filter_wrong = Filter::new("/").header("Test-Header", Some(String::from("Not Value")));
+
+        assert_eq!(filter_exact.matches_request(&req), true);
+        assert_eq!(filter_any.matches_request(&req), true);
+        assert_eq!(filter_wrong.matches_request(&req), false);
+    }
+
+    #[test]
+    fn test_query_filter() {
+        let req = create_request();
+        let filter_correct = Filter::new("/").query("Test-Query", QueryFilter::NumberExact(420.0));
+        let filter_incorrect =
+            Filter::new("/").query("Test-Query", QueryFilter::NumberExact(420.69));
+
+        assert_eq!(filter_correct.matches_request(&req), true);
+        assert_eq!(filter_incorrect.matches_request(&req), false);
+    }
+
+    #[test]
+    fn test_method_filter() {
+        let req = create_request();
+        let filter_correct = Filter::new("/").method(Method::GET);
+        let filter_incorrect = Filter::new("/").method(Method::DELETE);
+        // Any method will match to this filter.
+        let filter_any = Filter::new("/");
+        assert_eq!(filter_correct.matches_request(&req), true);
+        assert_eq!(filter_incorrect.matches_request(&req), false);
+        assert_eq!(filter_any.matches_request(&req), true);
+    }
+}
