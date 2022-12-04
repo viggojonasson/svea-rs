@@ -6,6 +6,7 @@ pub struct Filter {
     pub queries: Vec<(String, QueryFilter)>,
     pub body: Option<BodyFilter>,
     pub methods: Vec<Method>,
+    pub headers: Vec<(String, Option<String>)>,
 }
 
 impl Filter {
@@ -15,6 +16,13 @@ impl Filter {
             queries: Vec::new(),
             ..Default::default()
         }
+    }
+
+    /// Filter a request by a header and value.
+    /// If the value is None then the filter will only filter the header being present.
+    pub fn header(mut self, key: impl Into<String>, value: Option<String>) -> Self {
+        self.headers.push((key.into(), value));
+        self
     }
 
     /// Filter a request by this method.
@@ -59,6 +67,27 @@ impl Filter {
         // If it does, check if the body matches.
         if let Some(body_filter) = &self.body {
             if !body_filter.cmp_body_value(&body) {
+                return false;
+            }
+        }
+
+        for (needed_key, needed_value) in &self.headers {
+            let mut satisfies = false;
+
+            for (given_key, given_value) in &request.headers {
+                if needed_key == given_key {
+                    if let Some(value) = needed_value {
+                        if given_value == value {
+                            satisfies = true;
+                        }
+                    } else {
+                        satisfies = true;
+                    }
+                }
+            }
+
+            if !satisfies {
+                println!("{needed_key} does not satisfy!");
                 return false;
             }
         }
