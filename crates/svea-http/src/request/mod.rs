@@ -35,6 +35,11 @@ impl Request {
         self
     }
 
+    pub fn header(mut self, key: impl Into<String>, value: impl Into<String>) -> Self {
+        self.headers.insert(key.into(), value.into());
+        self
+    }
+
     pub fn path<P>(mut self, path: P) -> Self
     where
         P: Into<Path>,

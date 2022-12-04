@@ -30,7 +30,7 @@ pub fn get_server(port: u16) -> Server {
                 )
                 .route(
                     Route::new()
-                        .filter(Filter::new("/users"))
+                        .filter(Filter::new("/users").header("X-Get-User", None))
                         .handler(|server, _| async move {
                             let db = server.get_state::<UserDB>().unwrap();
 
@@ -79,7 +79,7 @@ mod tests {
 
         let mut client = Client::builder().address("localhost").port(3000).build();
 
-        let res = client.send(Request::new().path("/users")).await.unwrap();
+        let res = client.send(Request::new().path("/users").header("X-Get-User", "")).await.unwrap();
 
         assert_eq!(res.status, Status::Ok);
         assert_eq!(res.headers.get("User-Amount").unwrap(), "1");
