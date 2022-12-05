@@ -1,3 +1,4 @@
+use crate::router::route::Route;
 use crate::{handler::Handler, interceptor::Interceptor, router::Router};
 use std::future::Future;
 use std::{any::Any, sync::Arc};
@@ -9,7 +10,7 @@ pub mod connection;
 pub struct Server {
     pub address: String,
     pub port: u16,
-    pub router: Router,
+    pub routers: Vec<Router>,
     pub fallback: Option<Handler>,
     pub interceptors: Vec<Interceptor>,
     pub states: Vec<Arc<dyn std::any::Any + Send + Sync>>,
@@ -21,11 +22,11 @@ impl Default for Server {
         Self {
             address: "localhost".to_string(),
             port: 3000,
-            router: Router::default(),
             fallback: None,
             interceptors: Vec::new(),
             states: Vec::new(),
             path: None,
+            routers: vec![],
         }
     }
 }
@@ -40,14 +41,25 @@ impl Server {
         self
     }
 
-    /// Set an router for this server.
-    /// TODO: Make the router pass an Path and allow for multiple routers.
+    /// Add a router to this server.
+    /// TODO: Make the router pass an Path.
     pub fn router<R>(mut self, router: R) -> Self
     where
         R: Into<Router>,
     {
-        self.router = router.into();
+        self.routers.push(router.into());
         self
+    }
+
+    /// Add a route, this will create a completely new router to add this route to.
+    pub fn route<R>(mut self, route: R) -> Self
+    where
+        R: Into<Route>,
+    {
+        let router = Router::new().route(route.into());
+
+        self.routers.push(router);
+        return self;
     }
 
     /// Sets the fallback handler for the server.
