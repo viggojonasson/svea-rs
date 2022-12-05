@@ -3,6 +3,7 @@ use svea::{
     http::{Method, Response, Status},
     router::{route::Route, Router},
     server::Server,
+    service::HelloWorldService,
 };
 
 pub fn get_server(port: u16) -> Server {
@@ -12,6 +13,7 @@ pub fn get_server(port: u16) -> Server {
         .state(UserDB {
             0: vec![("John".to_string(), "Doe".to_string())],
         })
+        .service(HelloWorldService)
         .router(
             Router::new()
                 .route(
@@ -79,7 +81,10 @@ mod tests {
 
         let mut client = Client::builder().address("localhost").port(3000).build();
 
-        let res = client.send(Request::new().path("/users").header("X-Get-User", "")).await.unwrap();
+        let res = client
+            .send(Request::new().path("/users").header("X-Get-User", ""))
+            .await
+            .unwrap();
 
         assert_eq!(res.status, Status::Ok);
         assert_eq!(res.headers.get("User-Amount").unwrap(), "1");
@@ -99,7 +104,7 @@ mod tests {
         assert_eq!(res.status, Status::NotFound);
         assert_eq!(
             res.body,
-            "<h1>Page you tried to access does not exist!</h1>"
+            "<h1>Page you tried to access does not exist!</h1><br><h1>Hello World!</h1>Address: localhost"
         );
     }
 

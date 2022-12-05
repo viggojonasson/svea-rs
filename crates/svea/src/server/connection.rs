@@ -1,4 +1,4 @@
-use crate::server::Server;
+use crate::{server::Server, service::ServiceType};
 use std::sync::Arc;
 use svea_http::{Request, Response, Status};
 use tokio::{
@@ -32,6 +32,14 @@ pub async fn handle_connection(stream: &mut TcpStream, server: Arc<Server>) {
         if interceptor.can_activate(request.clone()).await {
             println!("Using interceptor {}", interceptor.name);
             response = (interceptor.on_request)(request.clone(), response.clone()).await;
+        }
+    }
+
+    for service in &server.services {
+        if service.service_type() == ServiceType::Last {
+            if service.filter().matches_request(&request) {
+                service.on_request(server.clone(), &request, &mut response);
+            }
         }
     }
 

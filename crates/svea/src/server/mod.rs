@@ -1,4 +1,5 @@
 use crate::router::route::Route;
+use crate::service::Service;
 use crate::{handler::Handler, interceptor::Interceptor, router::Router};
 use std::future::Future;
 use std::{any::Any, sync::Arc};
@@ -15,6 +16,7 @@ pub struct Server {
     pub interceptors: Vec<Interceptor>,
     pub states: Vec<Arc<dyn std::any::Any + Send + Sync>>,
     pub path: Option<Path>,
+    pub services: Vec<Box<dyn Service + Send + Sync>>,
 }
 
 impl Default for Server {
@@ -27,6 +29,7 @@ impl Default for Server {
             states: Vec::new(),
             path: None,
             routers: vec![],
+            services: vec![],
         }
     }
 }
@@ -34,6 +37,14 @@ impl Default for Server {
 impl Server {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    pub fn service<P>(mut self, service: P) -> Self
+    where
+        P: Service + Send + Sync + 'static,
+    {
+        self.services.push(Box::new(service));
+        self
     }
 
     pub fn port(mut self, port: u16) -> Self {
