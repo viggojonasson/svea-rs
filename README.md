@@ -7,8 +7,6 @@
 
 ## Examples:
 
----
-
 ### **Hello World Example**
 
 Simple hello world example.
@@ -27,8 +25,6 @@ Server::new()
     .run()
     .await;
 ```
-
----
 
 ### **Filter Example**
 
