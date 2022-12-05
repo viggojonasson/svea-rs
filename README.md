@@ -1,6 +1,4 @@
-# svea-rs
-
-Just playing around with Rust and web servers. Trying to learn rust.
+# [![Svea](assets/branding/logo-wide.svg)](https://svea.rs)
 
 ## Features
 
