@@ -1,5 +1,4 @@
 pub mod handler;
-pub mod interceptor;
 pub mod router;
 pub mod server;
 pub mod service;

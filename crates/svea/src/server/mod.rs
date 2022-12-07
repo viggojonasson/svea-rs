@@ -1,6 +1,6 @@
 use crate::router::route::Route;
 use crate::service::{FilteredService, GlobalService, Service};
-use crate::{handler::Handler, interceptor::Interceptor, router::Router};
+use crate::{handler::Handler, router::Router};
 use std::future::Future;
 use std::{any::Any, sync::Arc};
 use svea_http::{IntoResponse, Path, Request};
@@ -12,8 +12,8 @@ pub struct Server {
     pub address: String,
     pub port: u16,
     pub routers: Vec<Router>,
+    /// A fallback is a handler that gets executed whenever we get a request that is un-routable
     pub fallback: Option<Handler>,
-    pub interceptors: Vec<Interceptor>,
     pub states: Vec<Arc<dyn std::any::Any + Send + Sync>>,
     pub path: Option<Path>,
     pub services: Vec<Service>,
@@ -25,7 +25,6 @@ impl Default for Server {
             address: "localhost".to_string(),
             port: 3000,
             fallback: None,
-            interceptors: Vec::new(),
             states: Vec::new(),
             path: None,
             routers: vec![],
@@ -93,12 +92,6 @@ impl Server {
         R: IntoResponse + 'static,
     {
         self.fallback = Some(Handler::new(fallback));
-        self
-    }
-
-    /// Add an interceptor.
-    pub fn interceptor(mut self, interceptor: impl Into<Interceptor>) -> Self {
-        self.interceptors.push(interceptor.into());
         self
     }
 
