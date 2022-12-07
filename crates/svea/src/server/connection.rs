@@ -37,7 +37,11 @@ pub async fn handle_connection(stream: &mut TcpStream, server: Arc<Server>) {
 
     for service in &server.services {
         if service.service_type() == ServiceType::Last {
-            if service.filter().matches_request(&request) {
+            if let Some(filter) = service.filter() {
+                if filter.matches_request(&request) {
+                    service.on_request(server.clone(), &request, &mut response);
+                }
+            } else {
                 service.on_request(server.clone(), &request, &mut response);
             }
         }

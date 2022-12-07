@@ -13,7 +13,7 @@ pub enum ServiceType {
 pub trait Service {
     fn on_request(&self, server: Arc<Server>, request: &Request, response: &mut Response);
     fn service_type(&self) -> ServiceType;
-    fn filter(&self) -> Filter;
+    fn filter(&self) -> Option<Filter>;
 }
 
 /// Hello world example of use of a service.
@@ -29,7 +29,7 @@ impl Service for HelloWorldService {
         ServiceType::Last
     }
 
-    fn filter(&self) -> Filter {
-        Filter::new("/not-found")
+    fn filter(&self) -> Option<Filter> {
+        Some(Filter::new("/not-found"))
     }
 }
