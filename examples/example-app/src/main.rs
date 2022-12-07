@@ -13,7 +13,7 @@ pub fn get_server(port: u16) -> Server {
         .state(UserDB {
             0: vec![("John".to_string(), "Doe".to_string())],
         })
-        .service(HelloWorldService)
+        .global_service(HelloWorldService)
         .router(
             Router::new()
                 .route(
@@ -125,6 +125,9 @@ mod tests {
             .unwrap();
 
         assert_eq!(res.status, Status::Ok);
-        assert_eq!(res.body, "<h1>Hello, world!</h1>");
+        assert_eq!(
+            res.body,
+            "<h1>Hello, world!</h1><br><h1>Hello World!</h1>Address: localhost"
+        );
     }
 }

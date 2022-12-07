@@ -1,4 +1,4 @@
-use crate::{server::Server, service::ServiceType};
+use crate::{server::Server, service::Service};
 use std::sync::Arc;
 use svea_http::{Request, Response, Status};
 use tokio::{
@@ -36,13 +36,14 @@ pub async fn handle_connection(stream: &mut TcpStream, server: Arc<Server>) {
     }
 
     for service in &server.services {
-        if service.service_type() == ServiceType::Last {
-            if let Some(filter) = service.filter() {
-                if filter.matches_request(&request) {
+        match service {
+            Service::Global(service) => {
+                service.on_request(server.clone(), &request, &mut response);
+            }
+            Service::Filtered(service) => {
+                if service.filter().matches_request(&request) {
                     service.on_request(server.clone(), &request, &mut response);
                 }
-            } else {
-                service.on_request(server.clone(), &request, &mut response);
             }
         }
     }

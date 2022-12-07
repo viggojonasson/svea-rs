@@ -1,5 +1,5 @@
 use crate::router::route::Route;
-use crate::service::Service;
+use crate::service::{FilteredService, GlobalService, Service};
 use crate::{handler::Handler, interceptor::Interceptor, router::Router};
 use std::future::Future;
 use std::{any::Any, sync::Arc};
@@ -16,7 +16,7 @@ pub struct Server {
     pub interceptors: Vec<Interceptor>,
     pub states: Vec<Arc<dyn std::any::Any + Send + Sync>>,
     pub path: Option<Path>,
-    pub services: Vec<Box<dyn Service + Send + Sync>>,
+    pub services: Vec<Service>,
 }
 
 impl Default for Server {
@@ -39,11 +39,23 @@ impl Server {
         Self::default()
     }
 
-    pub fn service<P>(mut self, service: P) -> Self
+    /// Attach a global service
+    /// TODO: Make all service attach methods into one
+    pub fn global_service<P>(mut self, service: P) -> Self
     where
-        P: Service + Send + Sync + 'static,
+        P: GlobalService + Send + Sync + 'static,
     {
-        self.services.push(Box::new(service));
+        self.services.push(Service::Global(Box::new(service)));
+        self
+    }
+
+    /// Attach a fileted service
+    /// TODO: Make all service attach methods into one
+    pub fn filtered_service<P>(mut self, service: P) -> Self
+    where
+        P: FilteredService + Send + Sync + 'static,
+    {
+        self.services.push(Service::Filtered(Box::new(service)));
         self
     }
 

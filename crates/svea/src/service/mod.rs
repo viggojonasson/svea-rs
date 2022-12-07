@@ -3,33 +3,29 @@ use std::sync::Arc;
 use svea_filter::Filter;
 use svea_http::{Request, Response};
 
-#[derive(PartialEq, Eq)]
-pub enum ServiceType {
-    /// Run this server after an appropriate handler has handled the request.
-    Last,
+/// A service that runs a function after a request has been processed by a handler.
+pub enum Service {
+    Global(Box<dyn GlobalService + Send + Sync>),
+    Filtered(Box<dyn FilteredService + Send + Sync>),
 }
 
-/// A service is a function that is ran on every request that matches the filter.
-pub trait Service {
+/// A global service that is ran on **every single** request, no exceptions.
+pub trait GlobalService {
     fn on_request(&self, server: Arc<Server>, request: &Request, response: &mut Response);
-    fn service_type(&self) -> ServiceType;
-    fn filter(&self) -> Option<Filter>;
+}
+
+/// A filtered service that is ran on every request that **matches the filter**.
+pub trait FilteredService {
+    fn on_request(&self, server: Arc<Server>, request: &Request, response: &mut Response);
+    fn filter(&self) -> Filter;
 }
 
 /// Hello world example of use of a service.
 pub struct HelloWorldService;
 
-impl Service for HelloWorldService {
+impl GlobalService for HelloWorldService {
     fn on_request(&self, _server: Arc<Server>, _request: &Request, response: &mut Response) {
         response.body += &"<br><h1>Hello World!</h1>";
         response.body += &format!("Address: {}", _server.address);
-    }
-
-    fn service_type(&self) -> ServiceType {
-        ServiceType::Last
-    }
-
-    fn filter(&self) -> Option<Filter> {
-        Some(Filter::new("/not-found"))
     }
 }
