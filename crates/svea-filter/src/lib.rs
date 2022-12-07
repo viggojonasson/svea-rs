@@ -179,9 +179,10 @@ impl BodyFilter {
 
 #[cfg(test)]
 mod test {
+    use crate::BodyFilter;
     use crate::Filter;
     use crate::QueryFilter;
-    use svea_http::{Method, Path, QueryValue, Request};
+    use svea_http::{BodyValue, Method, Path, QueryValue, Request};
 
     fn create_request() -> Request {
         let path = Path::new()
@@ -190,7 +191,22 @@ mod test {
         Request::new()
             .header("Test-Header", "Value")
             .method(Method::GET)
+            .body(BodyValue::String(String::from("body-value")))
             .path(path)
+    }
+
+    #[test]
+    fn test_body_filter() {
+        let req = create_request();
+        let filter_exact =
+            Filter::new("/").body(BodyFilter::StringExact(String::from("body-value")));
+        let filter_any = Filter::new("/").body(BodyFilter::String);
+        let filter_wrong =
+            Filter::new("/").body(BodyFilter::StringExact(String::from("Not body-value")));
+
+        assert_eq!(filter_exact.matches_request(&req), true);
+        assert_eq!(filter_any.matches_request(&req), true);
+        assert_eq!(filter_wrong.matches_request(&req), false);
     }
 
     #[test]
