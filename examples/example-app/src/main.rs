@@ -3,7 +3,6 @@ use svea::{
     http::{Method, Response, Status},
     router::{route::Route, Router},
     server::Server,
-    service::HelloWorldService,
 };
 
 pub fn get_server(port: u16) -> Server {
@@ -13,7 +12,6 @@ pub fn get_server(port: u16) -> Server {
         .state(UserDB {
             0: vec![("John".to_string(), "Doe".to_string())],
         })
-        .global_service(HelloWorldService)
         .router(
             Router::new()
                 .route(
