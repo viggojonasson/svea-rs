@@ -1,4 +1,5 @@
 use crate::server::Server;
+use async_trait::async_trait;
 use std::sync::Arc;
 use svea_filter::Filter;
 use svea_http::{Request, Response};
@@ -10,22 +11,14 @@ pub enum Service {
 }
 
 /// A global service that is ran on **every single** request, no exceptions.
+#[async_trait]
 pub trait GlobalService {
-    fn on_request(&self, server: Arc<Server>, request: &Request, response: &mut Response);
+    async fn on_request(&self, server: Arc<Server>, request: &Request, response: &mut Response);
 }
 
 /// A filtered service that is ran on every request that **matches the filter**.
+#[async_trait]
 pub trait FilteredService {
-    fn on_request(&self, server: Arc<Server>, request: &Request, response: &mut Response);
+    async fn on_request(&self, server: Arc<Server>, request: &Request, response: &mut Response);
     fn filter(&self) -> Filter;
-}
-
-/// Hello world example of use of a service.
-pub struct HelloWorldService;
-
-impl GlobalService for HelloWorldService {
-    fn on_request(&self, _server: Arc<Server>, _request: &Request, response: &mut Response) {
-        response.body += &"<br><h1>Hello World!</h1>";
-        response.body += &format!("Address: {}", _server.address);
-    }
 }

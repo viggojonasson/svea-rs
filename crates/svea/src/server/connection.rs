@@ -31,11 +31,15 @@ pub async fn handle_connection(stream: &mut TcpStream, server: Arc<Server>) {
     for service in &server.services {
         match service {
             Service::Global(service) => {
-                service.on_request(server.clone(), &request, &mut response);
+                service
+                    .on_request(server.clone(), &request, &mut response)
+                    .await;
             }
             Service::Filtered(service) => {
                 if service.filter().matches_request(&request) {
-                    service.on_request(server.clone(), &request, &mut response);
+                    service
+                        .on_request(server.clone(), &request, &mut response)
+                        .await;
                 }
             }
         }
