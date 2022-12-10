@@ -1,6 +1,7 @@
 use crate::Status;
 pub use into_response::IntoResponse;
 use std::collections::hash_map::HashMap;
+use svea_cookies::{options::CookieOptions, Cookie};
 
 mod into_response;
 
@@ -8,6 +9,7 @@ mod into_response;
 pub struct Response {
     pub body: String,
     pub status: Status,
+    pub set_cookies: Vec<Cookie>,
     pub headers: HashMap<String, String>,
 }
 
@@ -30,6 +32,7 @@ impl TryInto<Response> for String {
             }
         }
 
+        // TODO: Add Cookie parsing.
         for line in lines.clone() {
             if line.is_empty() {
                 break;
@@ -52,6 +55,7 @@ impl TryInto<Response> for String {
             body,
             status,
             headers,
+            set_cookies: vec![],
         })
     }
 }
@@ -68,7 +72,22 @@ impl Response {
             body: String::new(),
             status: Status::Ok,
             headers: HashMap::new(),
+            set_cookies: vec![],
         }
+    }
+
+    pub fn set_cookie(
+        mut self,
+        name: String,
+        value: String,
+        options: Option<CookieOptions>,
+    ) -> Self {
+        self.set_cookies.push(Cookie {
+            name,
+            value,
+            options,
+        });
+        self
     }
 
     pub fn status(mut self, status: Status) -> Self {
@@ -100,6 +119,9 @@ impl From<Response> for String {
         string.push_str(&format!("HTTP/1.1 {}\n", response.status.to_string()));
         for (key, value) in response.headers {
             string.push_str(&format!("{}: {}\n", key, value));
+        }
+        for cookie in response.set_cookies {
+            string.push_str(&format!("{}\n", cookie.to_string()));
         }
         string.push_str("\n");
         string.push_str(&response.body);

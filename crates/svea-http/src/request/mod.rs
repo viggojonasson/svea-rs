@@ -1,3 +1,5 @@
+use svea_cookies::{Cookie, Cookies};
+
 use crate::path::{parse_as_path, Path};
 use crate::{parse_body, BodyValue, Method};
 use std::collections::HashMap;
@@ -8,7 +10,7 @@ pub struct Request {
     pub method: Method,
     pub path: Path,
     pub headers: HashMap<String, String>,
-    pub cookies: HashMap<String, String>,
+    pub cookies: Cookies,
     pub ip_address: Option<String>,
 }
 
@@ -19,7 +21,7 @@ impl Default for Request {
             method: Method::GET,
             path: "/".into(),
             headers: HashMap::new(),
-            cookies: HashMap::new(),
+            cookies: Cookies::new(),
             ip_address: None,
         }
     }
@@ -28,6 +30,11 @@ impl Default for Request {
 impl Request {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    pub fn cookie(mut self, cookie: Cookie) -> Self {
+        self.cookies.get_all_mut().push(cookie);
+        self
     }
 
     pub fn method(mut self, method: Method) -> Self {
@@ -90,7 +97,7 @@ impl TryInto<Request> for String {
         let path = parts.next().unwrap().to_string();
 
         let mut headers = HashMap::new();
-        let mut cookies = HashMap::new();
+        let mut cookies = Cookies::new();
 
         for line in lines.clone() {
             let mut parts = line.splitn(2, ": ");
@@ -101,10 +108,11 @@ impl TryInto<Request> for String {
                 for cookie in parts.next().unwrap().split("; ") {
                     let mut parts = cookie.splitn(2, "=");
 
-                    cookies.insert(
-                        parts.next().unwrap().to_string(),
-                        parts.next().unwrap().to_string(),
-                    );
+                    cookies.get_all_mut().push(Cookie {
+                        name: parts.next().unwrap().to_string(),
+                        value: parts.next().unwrap().to_string(),
+                        options: None,
+                    })
                 }
             }
 
@@ -175,6 +183,18 @@ mod test {
             BodyValue::String(String::from("Hello, World!"))
         );
         assert_eq!(parsed.headers.get("Host").unwrap(), "localhost:8080");
-        assert_eq!(parsed.cookies.get("test").unwrap(), "123")
+        assert_eq!(
+            parsed.cookies.get_by_key("test".to_string()).unwrap().value,
+            "123".to_string()
+        );
+        assert_eq!(
+            parsed
+                .cookies
+                .get_by_value("123".to_string())
+                .get(0)
+                .unwrap()
+                .name,
+            "test".to_string()
+        );
     }
 }
