@@ -72,8 +72,8 @@ impl GlobalService for VisitCounterService {
             } else {
                 user_spec_vis_count_lock
                     .iter_mut()
-                    .find(|(id, count)| *id == user_id)
-                    .map(|(id, count)| {
+                    .find(|(id, _count)| *id == user_id)
+                    .map(|(_id, count)| {
                         *count += 1;
                     });
             }
