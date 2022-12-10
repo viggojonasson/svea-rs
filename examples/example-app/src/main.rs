@@ -102,7 +102,7 @@ mod tests {
         assert_eq!(res.status, Status::NotFound);
         assert_eq!(
             res.body,
-            "<h1>Page you tried to access does not exist!</h1><br><h1>Hello World!</h1>Address: localhost"
+            "<h1>Page you tried to access does not exist!</h1>"
         );
     }
 
@@ -123,9 +123,6 @@ mod tests {
             .unwrap();
 
         assert_eq!(res.status, Status::Ok);
-        assert_eq!(
-            res.body,
-            "<h1>Hello, world!</h1><br><h1>Hello World!</h1>Address: localhost"
-        );
+        assert_eq!(res.body, "<h1>Hello, world!</h1>");
     }
 }
