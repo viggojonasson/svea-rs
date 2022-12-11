@@ -27,6 +27,7 @@ impl GlobalService for VisitCounterService {
         let mut global_visit_count = global_visit_count.0.lock().await;
 
         let user_id;
+        let mut count: usize = 1;
 
         // Function to generate a new id for a user.
         // Basically just incrementing the count based on the user list.
@@ -73,8 +74,9 @@ impl GlobalService for VisitCounterService {
                 user_spec_vis_count_lock
                     .iter_mut()
                     .find(|(id, _count)| *id == user_id)
-                    .map(|(_id, count)| {
-                        *count += 1;
+                    .map(|(_id, user_count)| {
+                        count = user_count.clone() + 1;
+                        *user_count += 1;
                     });
             }
         }
@@ -82,7 +84,7 @@ impl GlobalService for VisitCounterService {
         response.body += format!(
             " Your user id is: {} You have visited this page {} times. There have been {} unique visitors.",
             user_id,
-            user_spec_vis_count_lock.len(),
+            count,
             global_visit_count
         )
         .as_str();
