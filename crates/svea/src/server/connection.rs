@@ -26,7 +26,13 @@ pub async fn handle_connection(stream: &mut TcpStream, server: Arc<Server>) {
         request.ip_address = Some(addr.ip().to_string());
     }
 
-    let mut response = map_request(request.clone(), server.clone()).await;
+    let response = map_request(request.clone(), server.clone()).await;
+
+    if response.is_none() {
+        return;
+    }
+
+    let mut response = response.unwrap();
 
     for service in &server.services {
         match service {
@@ -53,13 +59,13 @@ pub async fn handle_connection(stream: &mut TcpStream, server: Arc<Server>) {
     stream.flush().await.unwrap();
 }
 
-pub async fn map_request(request: Request, server: Arc<Server>) -> Response {
+pub async fn map_request(request: Request, server: Arc<Server>) -> Option<Response> {
     // Go through all our routers and see which router can handle this request.
     // TODO?: Maybe cache this?
     for router in &server.routers {
         match router.find_matching_route(&request) {
             Some(route) => {
-                return route.handler.handle(server.clone(), request).await;
+                return Some(route.handler.handle(server.clone(), request).await);
             }
             None => {}
         }
@@ -67,7 +73,13 @@ pub async fn map_request(request: Request, server: Arc<Server>) -> Response {
 
     // Check if we have a fallback that can handle this request.
     match &server.fallback {
-        Some(fallback) => fallback.handle(server.clone(), request).await,
-        None => Response::new().status(Status::NotFound),
+        Some(fallback) => Some(fallback.handle(server.clone(), request).await),
+        None => {
+            if server.no_default_404 == true {
+                None
+            } else {
+                Some(Response::new().status(Status::NotFound))
+            }
+        }
     }
 }

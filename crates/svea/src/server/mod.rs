@@ -17,6 +17,8 @@ pub struct Server {
     pub states: Vec<Arc<dyn std::any::Any + Send + Sync>>,
     pub path: Option<Path>,
     pub services: Vec<Service>,
+    /// Whether to respond to requests that would map to 404.
+    pub no_default_404: bool,
 }
 
 impl Default for Server {
@@ -29,6 +31,7 @@ impl Default for Server {
             path: None,
             routers: vec![],
             services: vec![],
+            no_default_404: false,
         }
     }
 }
@@ -36,6 +39,12 @@ impl Default for Server {
 impl Server {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// Whether to respond to requests that would map to 404.
+    pub fn no_default_404(mut self, no_default_404: bool) -> Self {
+        self.no_default_404 = no_default_404;
+        self
     }
 
     /// Attach a global service

@@ -106,6 +106,7 @@ async fn main() {
         .state(UserSpecificVisitCount(Mutex::new(vec![])))
         .state(GlobalVisitCount(Mutex::new(0)))
         .router(router)
+        .no_default_404(true)
         .run()
         .await;
 }
