@@ -1,4 +1,5 @@
 pub mod body;
+pub mod cookies;
 pub mod method;
 pub mod path;
 pub mod query;
@@ -7,6 +8,7 @@ pub mod response;
 pub mod status;
 
 pub use body::*;
+pub use cookies::*;
 pub use method::*;
 pub use path::*;
 pub use query::*;

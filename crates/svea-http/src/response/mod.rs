@@ -1,7 +1,7 @@
+use crate::cookies::{options::CookieOptions, Cookie};
 use crate::Status;
 pub use into_response::IntoResponse;
 use std::collections::hash_map::HashMap;
-use svea_cookies::{options::CookieOptions, Cookie};
 
 mod into_response;
 

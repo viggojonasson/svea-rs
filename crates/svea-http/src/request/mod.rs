@@ -1,5 +1,4 @@
-use svea_cookies::{Cookie, Cookies};
-
+use crate::cookies::{Cookie, Cookies};
 use crate::path::{parse_as_path, Path};
 use crate::{parse_body, BodyValue, Method};
 use std::collections::HashMap;
