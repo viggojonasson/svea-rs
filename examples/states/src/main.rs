@@ -6,14 +6,30 @@
 // This is made possible using server states, global services and cookie mangement.
 
 use async_trait::async_trait;
+use hex::encode;
+use sha2::{Digest, Sha512};
 use std::sync::Arc;
 use svea::prelude::*;
 use tokio::sync::{Mutex, MutexGuard};
 
-pub struct UserSpecificVisitCount(Mutex<Vec<(usize, usize)>>);
+pub const SALT: &'static str = "insert-salt-here";
+
+pub struct UserSpecificVisitCount(Mutex<Vec<(String, usize)>>);
 pub struct GlobalVisitCount(Mutex<usize>);
 
 pub struct VisitCounterService;
+
+pub fn generate_user_id(user_id: usize, ip_address: String) -> String {
+    let mut hasher = Sha512::new();
+
+    hasher.update(format!("{user_id}{ip_address}{SALT}"));
+
+    let result = hasher.finalize();
+
+    let hash_string = encode(result);
+
+    hash_string
+}
 
 #[async_trait]
 impl GlobalService for VisitCounterService {
@@ -26,15 +42,21 @@ impl GlobalService for VisitCounterService {
         let global_visit_count = server.get_state::<GlobalVisitCount>().unwrap();
         let mut global_visit_count = global_visit_count.0.lock().await;
 
-        let user_id;
+        let user_id: String;
         let mut count: usize = 1;
 
         // Function to generate a new id for a user.
-        // Basically just incrementing the count based on the user list.
-        let get_new_id = |visit_count: &MutexGuard<Vec<(usize, usize)>>| {
-            let last = visit_count.last().unwrap_or_else(|| &(0, 0));
+        // Uses the user count and ip address + a salt to get an id.
+        // This is quite a brainless "solution" that doesn't make sense in this case because it doesnt need to be secure
+        // and because it uses a memory based count which changes on a restart.
+        let get_new_id = |visit_count: &MutexGuard<Vec<(String, usize)>>,
+                          ip_address: &Option<String>| {
+            let user_count = visit_count.len() + 1;
 
-            last.1 + 1
+            generate_user_id(
+                user_count,
+                ip_address.clone().unwrap_or("127.0.0.1".to_string()),
+            )
         };
 
         // There is no user_id cookie present.
@@ -43,9 +65,9 @@ impl GlobalService for VisitCounterService {
             *global_visit_count += 1;
 
             // Now lets create a specific user for this request.
-            let new_user_id = get_new_id(&user_spec_vis_count_lock);
+            let new_user_id = get_new_id(&user_spec_vis_count_lock, &request.ip_address);
 
-            user_spec_vis_count_lock.push((new_user_id, 1));
+            user_spec_vis_count_lock.push((new_user_id.clone(), 1));
 
             response.set_cookies.push(Cookie {
                 name: "user_id".to_string(),
@@ -56,20 +78,14 @@ impl GlobalService for VisitCounterService {
         } else {
             let user_id_value = user_id_cookie.unwrap().value.clone();
 
-            // Lets check if the user_id is valid.
-            let new_user_id = user_id_value.parse::<usize>().unwrap_or_else(|_| {
-                // If the user_id is not valid, lets create a new one.
-                get_new_id(&user_spec_vis_count_lock)
-            });
-
-            user_id = new_user_id;
+            user_id = user_id_value;
 
             if user_spec_vis_count_lock
                 .iter()
                 .find(|(id, _count)| *id == user_id)
                 .is_none()
             {
-                user_spec_vis_count_lock.push((new_user_id, 0));
+                user_spec_vis_count_lock.push((user_id.clone(), 0));
             } else {
                 user_spec_vis_count_lock
                     .iter_mut()

@@ -9,3 +9,5 @@ edition = "2021"
 tokio = { version = "1.21.2", features = ["full"] }
 svea = { path = "../../crates/svea" }
 async-trait = "0.1.59"
+sha2 = "0.10.6"
+hex = "0.4.3"
