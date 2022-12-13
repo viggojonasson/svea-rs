@@ -70,3 +70,9 @@ To run: `cargo run --bin example-app`
 The first example in the readme.
 
 To run: `cargo run --bin readme-example`
+
+### **`states`**
+
+An example server states and cookies to track visit counts of both global and unique users.
+
+To run `cargo run --bin states`
